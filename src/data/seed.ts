@@ -1,0 +1,162 @@
+import type { DashboardData } from "../types";
+
+export const seedData: DashboardData = {
+  stats: [
+    { label: "Active permits", value: "1,284", delta: "+9.2%" },
+    { label: "Guest sessions today", value: "312", delta: "+14%" },
+    { label: "Violations prevented", value: "87", delta: "-22 min avg response" },
+    { label: "Occupancy accuracy", value: "98.4%", delta: "+6.1 pts" }
+  ],
+  spots: [
+    {
+      id: "A1",
+      zone: "North Court",
+      status: "resident",
+      assignedUnit: "214",
+      assignedResident: "Jordan Lee",
+      currentPlate: "8HTX224",
+      note: "Smart Decal active"
+    },
+    { id: "A2", zone: "North Court", status: "open", note: "Visitor-friendly spot" },
+    {
+      id: "A3",
+      zone: "North Court",
+      status: "guest",
+      assignedUnit: "302",
+      assignedResident: "Camila Flores",
+      currentPlate: "6LPE920",
+      note: "Guest pass expires in 48 min"
+    },
+    {
+      id: "B7",
+      zone: "Clubhouse",
+      status: "violation",
+      currentPlate: "3VLE551",
+      note: "Expired session"
+    },
+    {
+      id: "B8",
+      zone: "Clubhouse",
+      status: "resident",
+      assignedUnit: "118",
+      assignedResident: "Miles Carter",
+      currentPlate: "7KDU402",
+      note: "Assigned compact space"
+    },
+    { id: "C4", zone: "East Garage", status: "open", note: "EV-ready" },
+    {
+      id: "C5",
+      zone: "East Garage",
+      status: "guest",
+      assignedUnit: "Lobby",
+      assignedResident: "Delivery",
+      currentPlate: "TEMP-QR",
+      note: "15-minute service window"
+    },
+    {
+      id: "C6",
+      zone: "East Garage",
+      status: "resident",
+      assignedUnit: "441",
+      assignedResident: "Avery Nguyen",
+      currentPlate: "9MVP611",
+      note: "Docs pending review"
+    }
+  ],
+  permits: [
+    {
+      id: "permit-1",
+      residentName: "Jordan Lee",
+      unit: "214",
+      plate: "8HTX224",
+      vehicle: "Tesla Model Y",
+      permitType: "smart-decal",
+      status: "approved",
+      registrationOnFile: true
+    },
+    {
+      id: "permit-2",
+      residentName: "Avery Nguyen",
+      unit: "441",
+      plate: "9MVP611",
+      vehicle: "Toyota Camry",
+      permitType: "temporary",
+      status: "review",
+      registrationOnFile: false
+    },
+    {
+      id: "permit-3",
+      residentName: "Miles Carter",
+      unit: "118",
+      plate: "7KDU402",
+      vehicle: "Ford F-150",
+      permitType: "plate-based",
+      status: "approved",
+      registrationOnFile: true
+    }
+  ],
+  guestSessions: [
+    {
+      id: "guest-1",
+      guestName: "Amelia R.",
+      hostUnit: "302",
+      plate: "6LPE920",
+      phone: "(310) 555-0188",
+      durationHours: 2,
+      remainingMinutes: 48,
+      expiresSoon: false,
+      zone: "North Court"
+    },
+    {
+      id: "guest-2",
+      guestName: "Marcus T.",
+      hostUnit: "118",
+      plate: "4WRS118",
+      phone: "(424) 555-0173",
+      durationHours: 1,
+      remainingMinutes: 11,
+      expiresSoon: true,
+      zone: "Clubhouse"
+    },
+    {
+      id: "guest-3",
+      guestName: "Food delivery",
+      hostUnit: "Lobby",
+      plate: "TEMP-QR",
+      phone: "(800) 555-0100",
+      durationHours: 1,
+      remainingMinutes: 7,
+      expiresSoon: true,
+      zone: "East Garage"
+    }
+  ],
+  violations: [
+    {
+      id: "violation-1",
+      plate: "5BXR993",
+      reason: "No permit found",
+      zone: "Clubhouse",
+      action: "warning",
+      gpsStamp: "34.0522, -118.2437",
+      photoCount: 2
+    },
+    {
+      id: "violation-2",
+      plate: "3VLE551",
+      reason: "Guest time expired",
+      zone: "North Court",
+      action: "tow-watch",
+      gpsStamp: "34.0524, -118.2440",
+      photoCount: 3
+    },
+    {
+      id: "violation-3",
+      plate: "8GKF204",
+      reason: "Repeat offense",
+      zone: "East Garage",
+      action: "tow-dispatched",
+      gpsStamp: "34.0520, -118.2432",
+      photoCount: 4
+    }
+  ]
+};
