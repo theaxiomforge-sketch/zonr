@@ -93,7 +93,7 @@ The scope names the writing CVC §22658. What the statute, the signs, or the HOA
 
 | Id | Behavior | Label |
 | --- | --- | --- |
-| PAC-050 | A signer with the board or committee permission may create a draft linked to one warning whose grace has ended, in the same community | PROPOSED |
+| PAC-050 | An account with the signer permission may create a draft linked to one warning whose grace has ended, in the same community. The check is that permission. It is not a test of committee membership or of a person's name | PROPOSED |
 | PAC-051 | Signing stores the signer id, the time, the plate, the violation id, and the uploaded writing. The row becomes `signed` | PROPOSED |
 | PAC-052 | Sign has no outbound effect. There is no dispatch, no vendor API, and no tow-company account | PROPOSED |
 | PAC-053 | A patroller, a resident, a guest link, and an admin who lacks the signer permission cannot sign | PROPOSED |

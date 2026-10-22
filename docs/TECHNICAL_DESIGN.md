@@ -107,7 +107,7 @@ A void does not delete the warning.
 | I-8 | A `signed` authorization points at a violation that was already `grace_elapsed` at sign time | PROPOSED. Whether the statute requires this sequence is UNKNOWN (Q-016). The product rule is PROPOSED |
 | I-9 | Sign, void, and export do not perform network calls to a tow vendor | PROPOSED |
 | I-10 | Audit rows are not updated or deleted by the application | PROPOSED |
-| I-11 | No column or constant is a person's name used as a permission | PROPOSED |
+| I-11 | No column or constant names a person, including Henry, or encodes a committee-member-specific exception. Signer is a permission | PROPOSED |
 | I-12 | Guest-spot count is not a foreign key from a pass | PROPOSED |
 
 ## 8. Privacy and retention

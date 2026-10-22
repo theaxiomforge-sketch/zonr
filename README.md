@@ -14,7 +14,7 @@ The docs on this branch are the single-community pilot design Henry approved for
 | [docs/FRD.md](docs/FRD.md) | Pilot acceptance ids, and the prototype behaviors that fail them |
 | [docs/TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md) | Records, states, transitions, invariants, failures, permissions |
 | [docs/UX_DESIGN_SPEC.md](docs/UX_DESIGN_SPEC.md) | Pilot screens, including the removal of resident self-approval |
-| [docs/GTM_STRATEGY.md](docs/GTM_STRATEGY.md) | Pilot, then a reference, then other HOAs. No market figures |
+| [docs/GTM_STRATEGY.md](docs/GTM_STRATEGY.md) | Pilot, then a reference case, then other HOAs. No market figures |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md) | No tests today. Minimum cases for the pilot rules |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | GitHub Pages demo, D-053, and the fact that the pilot is not deployed |
 

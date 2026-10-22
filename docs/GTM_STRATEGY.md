@@ -21,7 +21,7 @@ There is no approved commercial target.
 | Id | PROPOSED criterion | UNAPPROVED |
 | --- | --- | --- |
 | G-1 | The pilot community can run S-1 through S-5 before any second community is offered the product | Yes |
-| G-2 | A reference story, if one is published, uses only facts the board agrees to release | Yes |
+| G-2 | A reference case, if one is published, uses only facts the board agrees to release | Yes |
 | G-3 | Outreach to other HOAs waits on that reference and on Henry | Yes |
 
 G-1 through G-3 are not acceptance of a launch.
@@ -43,8 +43,8 @@ Henry's words, given for 2026-10-22: after piloting at his own community, he wil
 | Step | What it is | What it is not |
 | --- | --- | --- |
 | 1. Pilot | One California HOA. About 700 homes and about 75 unnumbered guest spots are the profile in the scope. Those counts are not audited here (UNKNOWN as measurements, Q-015) | A multi-community product |
-| 2. Reference | A story the board can stand behind, after the pilot has run | A case study written before the pilot |
-| 3. Other HOAs | Later marketing, using the reference | A build of signup, billing, or a directory in the pilot |
+| 2. Reference case | A story the board can stand behind, after the pilot has run | A case study written before the pilot |
+| 3. Other HOAs | Later marketing, using the reference case | A build of signup, billing, or a directory in the pilot |
 | Sale of the company | Open, as intent | A process, a buyer, or a valuation (UNKNOWN) |
 
 Step 3 is why `community_id` and per-community export exist in the design. Building step 3 now is a non-goal (`PRD.md` section 8).
@@ -73,7 +73,7 @@ INFERRED and not for a slide: a board that already tows will care about the writ
 
 Price is UNKNOWN (Q-012). PROPOSED, not a quote: the board sees a number, including zero if that is the choice, before resident plates are collected.
 
-INFERRED: Henry would be on the committee of his own community and would also be the vendor. The board needs a disclosure or an agreement. Whether that document exists is UNKNOWN. Do not describe the pilot as an arm's-length sale until Q-012 is answered.
+INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. PROPOSED, for Henry: the board gets a disclosure or a formal agreement, and the pilot has a stated price. Whether that document or price exists is UNKNOWN. Do not describe the pilot as an arm's-length sale until Q-012 is answered.
 
 ## 9. Claim register
 
@@ -93,7 +93,7 @@ INFERRED: Henry would be on the committee of his own community and would also be
 2. The pilot has run S-1 through S-5, or Henry explicitly waives that (not waived).
 3. Q-012 has an answer the board has seen.
 4. RADAR has been asked for sizing only if a number will be said aloud. No number is cleared today.
-5. A reference, if used, is approved by the board (G-2).
+5. A reference case, if used, is approved by the board (G-2).
 
 ## 11. Questions
 

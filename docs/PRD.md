@@ -54,7 +54,7 @@ Henry's strategic intent, given as his words for 2026-10-22: after piloting at h
 | Tow company | Not a user. No login, no dispatch action | Approved scope |
 | Board or committee member | Signs the written tow authorization. Not a tow dispatcher | Approved scope |
 
-INFERRED: Henry sits on the pilot committee and would also be the vendor. The board needs a disclosure or a written agreement, and the pilot needs a price. That inference is not a finding that a disclosure already exists (UNKNOWN, Q-012).
+INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. That office and any agreement are UNKNOWN. PROPOSED, for Henry to accept or reject: the board gets a disclosure or a formal agreement before resident data is collected, and the pilot has a stated price, including zero if that is the choice (Q-012).
 
 ### 3.3 In scope for the pilot build
 
@@ -83,7 +83,7 @@ Every criterion in this section is PROPOSED and UNAPPROVED by Henry. None is a t
 | S-1 | A resident of the pilot community can issue a guest pass for a plate. The pass has an expiry. A pass that would break the stay cap or the month cap is refused and not stored | Yes |
 | S-2 | A resident cannot set their own vehicle to approved. An admin can. A non-admin call that tries to approve does not change the status | Yes |
 | S-3 | A patroller can check a plate and file a warning with at least one photo. The grace clock starts at that warning | Yes |
-| S-4 | A tow-authorization record can be signed only by a board or committee member, only after a warning and the configured grace, and the sign action sends nothing to a tow company | Yes |
+| S-4 | A tow-authorization record can be signed only by an account with the signer permission, only after a warning and the configured grace, and the sign action sends nothing to a tow company. The product does not test committee membership or a named person | Yes |
 | S-5 | An admin can export one community's passes, vehicles, violations, photos, authorizations, and audit events without exporting another community | Yes |
 | S-6 | Adding a second `community_id` in data does not require a schema change. The pilot UI does not offer a second community | Yes |
 
@@ -100,7 +100,7 @@ No adoption rate, revenue, or time-saved figure is a success criterion. Those wo
 | Explain CVC §22658, signage, or HOA rules in this set | UNKNOWN. RADAR |
 | Pick a price, a market size, or a competitor set | UNKNOWN. RADAR for sizing. Price is Q-012 |
 | Build multi-community product features | Principle only, section 8 |
-| Hardcode Henry as the signer or the admin | Acquirability. The permission is a role, not a person |
+| Hardcode Henry, or any committee-member exception, as the signer or the admin | Acquirability. The permission is a role, not a person |
 
 ## 6. Pilot behavior the design commits to
 
@@ -144,11 +144,13 @@ Henry is open to selling the company (VERIFIED as his statement). Terms are UNKN
 | Privacy and retention | None (VERIFIED). California privacy law applicability is UNKNOWN and goes to RADAR | Policy in `TECHNICAL_DESIGN.md` section 8. Durations UNKNOWN |
 | Audit trail | None (VERIFIED) | Actor, action, entity, community, time |
 | Architecture and ops | This doc set plus the Pages runbook | Keep them current when behavior changes |
-| No person-specific logic | The mock has no users (VERIFIED) | Roles, not named people |
+| No person-specific logic | The mock has no users (VERIFIED) | Roles, not named people. No committee-member-specific logic, and no constant that names Henry or any other person as signer or admin |
+
+The pilot MVP is section 3.3 only. Sections 8 and 9 are principles so a later sale or a second community is not blocked. They are not extra features. A community switcher, billing, a diligence portal, and a second HOA's signup are non-goals, not a build (PROPOSED).
 
 ## 10. Conflict of interest
 
-INFERRED from "his own community" plus the vendor role: Henry would be on the buying committee and on the selling side. PROPOSED response, not a decision: the board gets a disclosure or a contract before resident data is collected, and the pilot has a stated price even if that price is zero. Whether any of that exists is UNKNOWN (Q-012). The product must not encode "Henry may sign" as a special case.
+INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. That is not a verified office or contract (UNKNOWN). PROPOSED response, for Henry to accept or reject: the board gets a disclosure or a formal agreement before resident data is collected, and the pilot has a stated price, including zero if that is the choice. Whether any of that exists is UNKNOWN (Q-012). The product must not encode "Henry may sign" as a special case.
 
 ## 11. Questions only Henry can answer
 
@@ -167,7 +169,7 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | Q-009 | What does the guest link show, and when does the link die? | UNKNOWN. PROPOSED: that pass's plate, window, and the community's guest rules. No other people's data |
 | Q-010 | Export format, and which roles may run it? | UNKNOWN. PROPOSED: admin and signer; CSV plus the photo files |
 | Q-011 | How long are plates, photos, and phones kept? | UNKNOWN. California privacy applicability is UNKNOWN. Both go to RADAR before a duration is chosen |
-| Q-012 | What disclosure, contract, and price does the board need before the pilot? | UNKNOWN. The conflict is INFERRED. The response is PROPOSED |
+| Q-012 | What disclosure or formal agreement, and what price, does the board need before the pilot? | UNKNOWN. The conflict is INFERRED. The response is PROPOSED |
 | Q-013 | Which success rows in section 4, if any, does Henry accept? | All are PROPOSED and UNAPPROVED |
 | Q-014 | Can one person hold admin and signer, and is that two permissions or one job? | UNKNOWN. PROPOSED: two permissions, both grantable to one account, neither implied by the other |
 | Q-015 | Confirm the HOA's name and that "about 700" and "about 75" are the profile values to load | UNKNOWN as audited facts |
@@ -182,6 +184,6 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | Acceptance ids for the pilot | `FRD.md` |
 | Records, states, transitions, invariants, failures, permissions | `TECHNICAL_DESIGN.md` |
 | Screens for resident, guest link, patroller, admin, signer | `UX_DESIGN_SPEC.md` |
-| Pilot, then reference, then other HOAs | `GTM_STRATEGY.md` |
+| Pilot, then a reference case, then other HOAs | `GTM_STRATEGY.md` |
 | What to test first | `TEST_PLAN.md` |
 | Pages demo versus pilot operations | `RUNBOOK.md` |
