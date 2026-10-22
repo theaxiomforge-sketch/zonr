@@ -1,166 +1,187 @@
-# Zonr product requirements
+# Zonr product requirements — single-community pilot
 
-Baseline: main `99d283e9e7aad854559df145ea4834fab428fec1` ("Opt Pages workflow into Node 24"), plus the public site that build deployed. Henry approved a docs-only pull request. He has not approved the product choices below. Anything the code does not settle is a question in section 8, not a decision.
+Rewrite of the docs on pull request #1. Code baseline: `main` at `99d283e` ("Opt Pages workflow into Node 24"). Design baseline: Henry approved resuming design on a single-community pilot (2026-10-22). Success criteria in section 4 are PROPOSED and UNAPPROVED.
 
-Labels used in this set:
+`pilot-scope.md` and FOUNDRY's `assessment.md` were named as the inputs. They were not in the repository, and no Drive file with those titles was found. This PRD uses the scope the task stated. It does not add findings and attribute them to FOUNDRY. Anything those files may say beyond section 3 is UNKNOWN.
+
+## 1. How a claim is labeled
 
 | Label | Meaning |
 | --- | --- |
-| IMPLEMENTED | Behavior present in the prototype at the baseline commit |
-| PROPOSED | A direction the UI copy points at, or a seam the code leaves open. Not designed and not built |
-| UNKNOWN | Not in the repo. Only Henry can close it |
+| VERIFIED | Checked in the git tree at `99d283e`, or in GitHub state read for this rewrite |
+| INFERRED | A conclusion from those facts or from Henry's stated intent. Not a measurement |
+| UNKNOWN | Not in the repo and not settled by the approved scope |
+| PROPOSED | A design choice or success test written here. Not an approval |
 
-## 1. Purpose
+Legal content (what CVC §22658 requires, signage, this HOA's rules, California privacy applicability) is UNKNOWN. Those questions go to RADAR. This PRD does not restate RADAR's 2026-10-22 research brief as law or as product requirements.
 
-### 1.1 What the code says the product is
+## 2. Purpose
 
-Zonr, in this repository, is a residential parking-operations prototype. The page title is "Zonr | Smart Parking Operations". The header says "Smart parking operations for residential communities." The GitHub repository description says: Focuses on the "parking zones" managed within the app. The overview calls the category "Proptech parking orchestration" and says the product should replace hangtags, disconnected spreadsheets, and manual patrol ambiguity with digital permits, guest sessions, a map, and enforcement verification.
+### 2.1 What the repository is today
 
-That positioning is IMPLEMENTED as copy. The software behind it is IMPLEMENTED as a single-browser mock. Five routes share one in-memory dashboard: Overview, Manager, Resident, Guest, and Enforcement. There is no server, no account, and no saved record after a reload.
+Zonr at `99d283e` is a public Vite + React + TypeScript mock: five pages, one in-memory seed, no accounts, no server (VERIFIED). The resident editor can set a permit to approved, review, or revoked (VERIFIED, `src/pages/ResidentPage.tsx`). That is the self-approve gap. The pilot design removes it: only an admin can approve a resident vehicle.
 
-### 1.2 Why this document exists
+The mock is not the pilot. Guest sessions do not expire, spots are numbered buttons, violations can be stored as `tow-dispatched`, and nothing is exported (VERIFIED).
 
-The prototype mixes working behavior with marketing sentences. A reader can think QR codes, cameras, drag-and-drop, document upload, property-management sync, and tow dispatch already exist. They do not. This PRD records the product the code actually is, names the next product only as PROPOSED, and stops where Henry has to choose.
+Open pull request #2 (`935e9df`, not merged) replaces eight seeded plates with `DEMO001`–`DEMO008` and adds a demo banner (VERIFIED on that branch only). `main` does not have that commit.
 
-## 2. Scope
+### 2.2 What this design is
 
-### 2.1 In scope for this PRD
+A pilot for one community, shaped so a later second community does not require a schema change. The pilot build does not include multi-community features. It does include `community_id` on every record, tenant-scoped access, and community configuration for caps, grace, and rules. No pilot number is hardcoded in logic (PROPOSED).
 
-| Item | Status | Evidence |
+Henry's strategic intent, given as his words for 2026-10-22: after piloting at his own community, he will market Zonr to other communities, and he is open to selling the company (VERIFIED as that statement). Selling terms are UNKNOWN.
+
+## 3. Scope
+
+### 3.1 Pilot site
+
+| Item | Statement | Label |
 | --- | --- | --- |
-| One unnamed residential site with three zones: North Court, Clubhouse, East Garage | IMPLEMENTED | Seed data and the zone dropdowns |
-| Eight parking spots with status open, resident, guest, or violation | IMPLEMENTED | `src/data/seed.ts`, manager grid |
-| Three resident permits, types smart-decal, plate-based, and temporary, statuses approved, review, and revoked | IMPLEMENTED | Permit type and the resident editor |
-| Guest session registration into the shared list, and occupancy of an open spot in the chosen zone | IMPLEMENTED | `createGuestSession` and the guest page |
-| Spot assignment edits from the manager page | IMPLEMENTED | Assignment form |
-| Violation logging that can mark a matching plate as a violation | IMPLEMENTED | Enforcement page |
-| A public GitHub Pages demo | IMPLEMENTED | `.github/workflows/deploy-pages.yml` and the live site |
-| A real multi-user backend, auth, persistence, QR, camera, payments, or tow integration | PROPOSED | Named in copy or left as a mock seam. Not built |
+| Site | One California HOA | Design baseline from the approved scope. Not in the repo. The HOA's legal name is UNKNOWN |
+| Size | About 700 homes | Same. Not a measured count in this repo. UNKNOWN as an audited figure. Stored later as community profile data, not as a constant |
+| Guest parking | About 75 unnumbered guest spots | Same. Tracking is by plate and time, not by stall number |
+| Identity | Plate and time | Approved scope |
 
-### 2.2 Users the prototype actually serves
+### 3.2 Buyer and users
 
-The prototype has no user accounts. Anyone who can open the site can use every page. The four operating roles below are pages, not permissions.
+| Party | Role in the pilot | Label |
+| --- | --- | --- |
+| HOA board | Buyer. Buys on the committee's recommendation | Approved scope |
+| Residents | Users. Register vehicles. Issue guest passes within caps | Approved scope, plus INFERRED that residents issue passes. Who else may issue is Q-003 |
+| Volunteer patrollers | Users. Plate check and violation log | Approved scope |
+| Admins | Users. Approve vehicles, configure rules, export | Approved scope. Admin is not automatically a tow signer (PROPOSED) |
+| Guests | Not accounts. A link only | Approved scope |
+| Tow company | Not a user. No login, no dispatch action | Approved scope |
+| Board or committee member | Signs the written tow authorization. Not a tow dispatcher | Approved scope |
 
-| Role page | What that person can do in the prototype |
+INFERRED: Henry sits on the pilot committee and would also be the vendor. The board needs a disclosure or a written agreement, and the pilot needs a price. That inference is not a finding that a disclosure already exists (UNKNOWN, Q-012).
+
+### 3.3 In scope for the pilot build
+
+| Capability | Rule |
 | --- | --- |
-| Overview visitor | Read the pitch, the sample stats, and links into the other pages |
-| Property manager | Select a spot and overwrite its unit, name, plate, and status. Read the permit queue and the violation list |
-| Resident | Search the three permits and edit vehicle, plate, status, and a registration checkbox |
-| Guest | Submit a session form. Read the session list |
-| Enforcement | Type a plate and log a warning, citation, tow-watch, or tow-dispatched record |
+| Guest passes | By plate, with an expiry, a per-stay cap, and a per-month cap. Cap values are community configuration (UNKNOWN until set, Q-001, Q-002) |
+| Resident vehicles | A registry. Only an admin can move a vehicle to approved |
+| Plate check | A patroller enters a plate and sees pass, vehicle, and open warning state for that community |
+| Violations | A log with photos. First outcome is a warning. A grace period then runs. Length is configuration (UNKNOWN, Q-005) |
+| Tow authorization | A record of a written authorization the scope names as CVC §22658, signed by a board or committee member. Zonr stores the record. Zonr does not authorize or dispatch a tow |
+| Disputes | Records export per community, including the audit trail |
+| Tenancy principle | `community_id` required on every record. Access is scoped to that id. Caps, grace, and rules are rows, not code |
 
-Who those roles are in a real deployment, and whether a resident should be able to revoke their own permit, is UNKNOWN. See Q-001, Q-003, and Q-006.
+### 3.4 Out of scope for the pilot build
 
-### 2.3 Sample world the prototype ships with
+Plate cameras, payments, tow dispatch, numbered spots, and property-system sync are out of the pilot build (approved scope). A community switcher, a second community's signup, billing, and a sales site are also out. Designing the schema so those could exist later is in scope. Building them is not.
 
-The seed is a demo scene, not a customer. It uses 555 phone numbers and GPS coordinates around 34.05, -118.24. The overview stats say 1,284 active permits, 312 guest sessions today, 87 violations prevented, and 98.4% occupancy accuracy. The editable records are 3 permits, 3 guest sessions, 3 violations, and 8 spots. Those figures do not describe the same property. The seed is also internally uneven: a guest session plate is not always the plate on the host's spot, and a violation's zone is not always the zone of the spot showing that plate. Treat the seed as fixture copy.
+Market sizing, statute text, signage rules, and this HOA's governing documents are out of this PRD. They belong to RADAR (UNKNOWN).
 
-## 3. Success
+## 4. Success
 
-### 3.1 Success of the prototype, as it exists
+Every criterion in this section is PROPOSED and UNAPPROVED by Henry. None is a target the pilot has accepted.
 
-The prototype succeeds when a reviewer can open the Pages site, or `npm run dev`, and walk one shared story without a backend:
+| Id | PROPOSED criterion | UNAPPROVED |
+| --- | --- | --- |
+| S-1 | A resident of the pilot community can issue a guest pass for a plate. The pass has an expiry. A pass that would break the stay cap or the month cap is refused and not stored | Yes |
+| S-2 | A resident cannot set their own vehicle to approved. An admin can. A non-admin call that tries to approve does not change the status | Yes |
+| S-3 | A patroller can check a plate and file a warning with at least one photo. The grace clock starts at that warning | Yes |
+| S-4 | A tow-authorization record can be signed only by a board or committee member, only after a warning and the configured grace, and the sign action sends nothing to a tow company | Yes |
+| S-5 | An admin can export one community's passes, vehicles, violations, photos, authorizations, and audit events without exporting another community | Yes |
+| S-6 | Adding a second `community_id` in data does not require a schema change. The pilot UI does not offer a second community | Yes |
 
-1. The overview loads the sample stats and the five destinations.
-2. A manager can select a spot and save a new assignment, and the grid shows it.
-3. A resident can find a permit and save a plate, vehicle, status, and registration flag, and the manager queue shows the edit.
-4. A guest can start a session, see it in the list, and see an open spot in that zone change on the manager grid.
-5. Enforcement can log a plate that already sits on a spot, and that spot turns into a violation.
-6. A browser reload clears every edit and restores the seed.
-7. A push to `main` that passes the Pages workflow updates `https://theaxiomforge-sketch.github.io/zonr/`.
+No adoption rate, revenue, or time-saved figure is a success criterion. Those would be UNKNOWN market claims.
 
-No numeric target, adoption goal, or service level is in the repo. Those are UNKNOWN (Q-016).
+## 5. Non-goals
 
-### 3.2 Success of a later product
-
-PROPOSED, and not specified: the resident page itself says vehicle changes "update locally now and can later be wired straight into a real permits API." The manager permit panel is badged "PMS sync next." Success for that later product cannot be written until Henry answers section 8. This PRD does not set revenue, accuracy, or response-time goals. The "-22 min avg response" and "98.4%" figures are seed strings. They are not measurements.
-
-## 4. Non-goals
-
-These are outside the prototype. They stay outside until Henry puts them in scope.
-
-| Non-goal | Why it is out |
+| Non-goal | Why |
 | --- | --- |
-| Authentication, roles, and per-community tenancy | No login exists. Every route is public |
-| A database or shared state across browsers | The store is a module variable. Reload rebuilds it from the seed |
-| QR codes, guest-session extension, and a ticking expiry | The guest page is a form. `expiresSoon` is stored and never shown. Minutes do not move |
-| Document upload | The resident control is a checkbox |
-| Drag-and-drop assignment | The manager map is a grid of buttons. The badge says "Drag-and-drop ready" |
-| License-plate cameras, photos, and a permit lookup at scan time | The scanner prints the plate input. New violations store `photoCount: 1` and a fixed GPS string. `logViolation` does not read permits |
-| Property-management sync | Badge copy only |
-| Tow dispatch to a vendor | The action is a label on a record |
-| Payments, citations as legal documents, notifications, email, or SMS | No such flows exist |
-| Making the overview statistics consistent with the eight spots | Not done, and not assumed to be a bug until Q-012 and Q-013 |
-| Go-to-market claims | See `GTM_STRATEGY.md`. None are treated as fact |
+| Treat the GitHub Pages mock as the pilot system of record | VERIFIED: it is a public static demo with no accounts |
+| Let a resident approve a permit | This is the gap the design closes |
+| Number the 75 guest spots | Approved scope: unnumbered. Count is profile data |
+| Call, email, or otherwise dispatch a tow company | Tow company is not a user. Signing a record is not a dispatch |
+| Explain CVC §22658, signage, or HOA rules in this set | UNKNOWN. RADAR |
+| Pick a price, a market size, or a competitor set | UNKNOWN. RADAR for sizing. Price is Q-012 |
+| Build multi-community product features | Principle only, section 8 |
+| Hardcode Henry as the signer or the admin | Acquirability. The permission is a role, not a person |
 
-## 5. Product behavior in force today
+## 6. Pilot behavior the design commits to
 
-Detail and acceptance ids live in `FRD.md`. The product rules a reviewer can rely on now:
+Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNICAL_DESIGN.md`.
 
-1. One browser session has one dashboard. Edits on one page show up on the others without a reload.
-2. A reload restores the seed. Nothing is saved.
-3. Guest registration stores an uppercased plate and `durationHours * 60` remaining minutes. On screen, every open spot in the chosen zone becomes a guest spot. The mock module itself updates only the first open spot. A reload discards both results. See the technical design for that split.
-4. The guest-session stat on screen increases by one per registration. The mock module does not store that increase. A reload restores "312".
-5. Saving a permit does not move the plate onto a parking spot. Enforcement matches the plate string on the spot, not the permit.
-6. Logging a violation rewrites every spot with that exact plate to status `violation`.
-7. Unknown routes return to the overview.
-8. There is no permission check.
+1. Every stored row carries `community_id`. A query without that scope returns nothing (PROPOSED).
+2. Guest passes are plate plus a time window. They do not name a stall (PROPOSED).
+3. Caps and grace are read from the community's configuration. Missing configuration fails closed: the action is refused (PROPOSED).
+4. Vehicle approval is an admin-only transition. A resident edit returns the vehicle to pending review and drops any prior approval on that plate (PROPOSED).
+5. The first violation outcome for a stay is a warning with photos. Grace runs from the warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED).
+6. The signed authorization stores who signed, when, the plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
+7. Guests open a link for one pass. The link does not show other plates, phones, or photos (PROPOSED).
+8. Export is per community and includes enough to reconstruct a dispute (PROPOSED). The file format is Q-010.
 
-## 6. PROPOSED next product
+## 7. Self-approve gap
 
-This section is a boundary, not a design.
+VERIFIED today: the resident form includes a status control whose options are approved, review, and revoked, and save writes that status through `updatePermit`. There is no actor and no role.
 
-The only integration seam in the code is `src/services/mockApi.ts`. The UI calls five functions: load the dashboard, create a guest session, update a permit, assign a spot, and create a violation. A real backend would replace those functions. The UI copy also names, without implementing, a permits API, property-management sync, QR entry, a camera, drag-and-drop, and tow escalation.
+Pilot rule (PROPOSED): the resident client cannot send a status. The server ignores a status field on a resident request. The only transition into `approved` is an admin action stored with `actor_id` and time. A resident change to plate or vehicle description moves an approved row back to `pending_review`.
 
-PROPOSED work stops at that sentence. Choosing the API, the system of record, auth, file storage, plate-recognition vendor, or tow partner would invent answers Henry has not given. Do not treat section 6 as approval to build a backend.
+## 8. Multi-community principle, not a build
 
-## 7. Constraints the repo already imposes
+Henry will market to other communities after this pilot (VERIFIED as his 2026-10-22 statement). The pilot therefore:
 
-| Constraint | Source |
+| Principle | Pilot build | Not built |
+| --- | --- | --- |
+| `community_id` on every record, including config, audit, and files | Yes | — |
+| Every read and write is filtered by the caller's community | Yes | A screen to join or switch communities |
+| Caps, grace, and house rules are configuration for that id | Yes | A marketplace of rule templates |
+| No constant for 700, 75, California, or the pilot name | Yes | — |
+| Export and deletion run for one community | Yes | A bulk sale-of-company tool |
+
+## 9. Acquirability, documented only
+
+Henry is open to selling the company (VERIFIED as his statement). Terms are UNKNOWN. The pilot does not build a diligence product. It does keep these practices so a later sale is not blocked by the pilot's shape (PROPOSED checklist, not a legal opinion):
+
+| Practice | Today | Pilot |
+| --- | --- | --- |
+| IP and licence inventory | No `LICENSE` file in the repo (VERIFIED). Ownership of the work is UNKNOWN (Q-018). npm dependencies are declared in `package.json` (VERIFIED) | A licence inventory as a document. Not a new feature |
+| Export and portability | None (VERIFIED) | Per-community export, S-5 |
+| Privacy and retention | None (VERIFIED). California privacy law applicability is UNKNOWN and goes to RADAR | Policy in `TECHNICAL_DESIGN.md` section 8. Durations UNKNOWN |
+| Audit trail | None (VERIFIED) | Actor, action, entity, community, time |
+| Architecture and ops | This doc set plus the Pages runbook | Keep them current when behavior changes |
+| No person-specific logic | The mock has no users (VERIFIED) | Roles, not named people |
+
+## 10. Conflict of interest
+
+INFERRED from "his own community" plus the vendor role: Henry would be on the buying committee and on the selling side. PROPOSED response, not a decision: the board gets a disclosure or a contract before resident data is collected, and the pilot has a stated price even if that price is zero. Whether any of that exists is UNKNOWN (Q-012). The product must not encode "Henry may sign" as a special case.
+
+## 11. Questions only Henry can answer
+
+Legal and market questions are listed here and routed to RADAR. Henry still has to accept or reject the product choices.
+
+| Id | Question | Label |
+| --- | --- | --- |
+| Q-001 | What is the per-stay cap, in what unit? | UNKNOWN |
+| Q-002 | What is the per-month cap: hours or count, and is the subject the plate, the household, or the unit? | UNKNOWN |
+| Q-003 | Who may create a guest pass, and who may revoke it before expiry? | UNKNOWN. PROPOSED: resident and admin create; the issuing resident and an admin revoke |
+| Q-004 | May one plate have two active passes in the same community? | UNKNOWN. PROPOSED: no |
+| Q-005 | How long is the grace period after a warning? | UNKNOWN |
+| Q-006 | After grace, is the next product step only a tow-authorization record? | UNKNOWN. PROPOSED: yes. No citation product in the pilot |
+| Q-007 | Is a warning invalid without a photo? | UNKNOWN. PROPOSED: at least one photo is required |
+| Q-008 | Does the pilot store a phone number? The mock does (VERIFIED) | UNKNOWN |
+| Q-009 | What does the guest link show, and when does the link die? | UNKNOWN. PROPOSED: that pass's plate, window, and the community's guest rules. No other people's data |
+| Q-010 | Export format, and which roles may run it? | UNKNOWN. PROPOSED: admin and signer; CSV plus the photo files |
+| Q-011 | How long are plates, photos, and phones kept? | UNKNOWN. California privacy applicability is UNKNOWN. Both go to RADAR before a duration is chosen |
+| Q-012 | What disclosure, contract, and price does the board need before the pilot? | UNKNOWN. The conflict is INFERRED. The response is PROPOSED |
+| Q-013 | Which success rows in section 4, if any, does Henry accept? | All are PROPOSED and UNAPPROVED |
+| Q-014 | Can one person hold admin and signer, and is that two permissions or one job? | UNKNOWN. PROPOSED: two permissions, both grantable to one account, neither implied by the other |
+| Q-015 | Confirm the HOA's name and that "about 700" and "about 75" are the profile values to load | UNKNOWN as audited facts |
+| Q-016 | What must a written CVC §22658 authorization contain, what signage must exist, and what do this HOA's rules add? | UNKNOWN. RADAR. The product stores the writing the signer uploads. It does not check the statute |
+| Q-017 | May a resident see their own violation history? | UNKNOWN. PROPOSED: a resident sees their vehicles and their own passes. They do not see other residents' plates or patroller photos |
+| Q-018 | Who owns the repository's IP, and what licence should the inventory name? | UNKNOWN. No `LICENSE` file (VERIFIED) |
+
+## 12. Document map
+
+| Question | Document |
 | --- | --- |
-| Static SPA. Hash URLs under `/zonr/` | `HashRouter`, `vite.config.ts` base `/zonr/`, Pages workflow uploads `dist/` |
-| TypeScript strict, React 18, React Router 6, Vite 5 | `package.json`, `tsconfig.json` |
-| Node 24 in the Pages workflow | `deploy-pages.yml` |
-| Public repo and public Pages site | GitHub Pages API: `public: true`, `https://theaxiomforge-sketch.github.io/zonr/` |
-| Changes to `main` are how the demo ships | Workflow trigger is `push` to `main`, plus manual dispatch |
-| D-053 says later changes arrive by pull request | Operating instruction for this work. Not enforced in the repo. See `RUNBOOK.md` |
-
-Privacy of the sample plates and phone numbers on a public URL is UNKNOWN (Q-015). The numbers are fictional 555 numbers, but the site is world-readable.
-
-## 8. Questions only Henry can answer
-
-These are the product questions. Engineering should not fill them in.
-
-| Id | Question |
-| --- | --- |
-| Q-001 | Who pays, who uses the product day to day, and who is explicitly not a user? |
-| Q-002 | Is Zonr one community's tool or software for many properties? The code has one unnamed site, three zones, and no property record. |
-| Q-003 | Are the five pages separate accounts with permissions, or public demo lenses? Today they are public lenses. |
-| Q-004 | Which UI sentences are commitments for a later release, and which are prototype decoration? |
-| Q-005 | What does a smart decal physically do, and is it required for a first real release? |
-| Q-006 | Who may set a permit to approved or revoked? The resident editor can do both today. |
-| Q-007 | What evidence counts as "registration on file," and is a checkbox an acceptable record? |
-| Q-008 | What are the guest rules: who may start a session, the real duration limits, extensions, overnight stays, delivery and lobby sessions, and the rule when the zone has no open spot? |
-| Q-009 | Should remaining time count down, and should expiry change the spot? Today the minutes never move. |
-| Q-010 | Is the plate the match key for enforcement? How should temporary plates, blank plates, and a permit plate edit that does not update the spot behave? |
-| Q-011 | Are warning, citation, tow-watch, and tow-dispatched notes only, or do they call an outside service? Who has authority to tow? |
-| Q-012 | Are the overview statistics real measures or sample copy? They do not match the eight spots and three permits. |
-| Q-013 | Is the hardcoded phrase "2 tow escalations pending" intentional demo copy or a defect? |
-| Q-014 | Which property-management system, if any, should sync, and which fields move in which direction? |
-| Q-015 | May the public Pages demo keep showing plates, phone numbers, and GPS, including after the data stops being a seed? |
-| Q-016 | What is success for this prototype, and what is success for a paid product? No target is in the repo. |
-| Q-017 | What, if anything, should the go-to-market doc be allowed to claim? Pricing, geography, competitors, and channel are absent. See `GTM_STRATEGY.md`. |
-| Q-018 | What is the exact text of D-053, who may merge to `main`, and should GitHub enforce it? |
-| Q-019 | Is `https://theaxiomforge-sketch.github.io/zonr/` the canonical demo, and who owns the GitHub account and the Pages environment? |
-| Q-020 | Which sentence is the product: the repo's "parking zones," or the UI's "smart parking operations"? |
-
-## 9. Document map
-
-| Question a reader has | Document |
-| --- | --- |
-| What must the prototype do, id by id? | `FRD.md` |
-| How is the client built, and where would a backend attach? | `TECHNICAL_DESIGN.md` |
-| What does each screen show, including copy that over-promises? | `UX_DESIGN_SPEC.md` |
-| What can we say in the market? | `GTM_STRATEGY.md` |
-| What should be tested first? | `TEST_PLAN.md` |
-| How does the demo ship, and how do changes land? | `RUNBOOK.md` |
+| Acceptance ids for the pilot | `FRD.md` |
+| Records, states, transitions, invariants, failures, permissions | `TECHNICAL_DESIGN.md` |
+| Screens for resident, guest link, patroller, admin, signer | `UX_DESIGN_SPEC.md` |
+| Pilot, then reference, then other HOAs | `GTM_STRATEGY.md` |
+| What to test first | `TEST_PLAN.md` |
+| Pages demo versus pilot operations | `RUNBOOK.md` |

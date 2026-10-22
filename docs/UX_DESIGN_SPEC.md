@@ -1,198 +1,116 @@
-# Zonr UX design spec
+# Zonr UX design spec — pilot
 
-Baseline: main `99d283e`, stylesheet `src/styles.css`, and the five pages. This spec records the interface that ships. It does not invent a visual system Henry has not drawn.
+Code baseline: the five public pages at `main` `99d283e` (VERIFIED). Pilot screens below are PROPOSED. They are not in the build. Success criteria are UNAPPROVED (`PRD.md` section 4).
+
+Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. This spec does not design signage or a statute checklist (UNKNOWN, RADAR, Q-016).
 
 ## 1. Purpose
 
-Describe what a person sees, what each control does, and which labels promise a product the screen does not run. Acceptance behavior is `FRD.md`. This file is the screen contract.
+Describe the pilot screens and the prototype screens they must not copy by accident, especially resident self-approval and tow dispatch.
 
 ## 2. Scope
 
-### 2.1 IMPLEMENTED
+### 2.1 Prototype, still the only UI
 
-One responsive page shell. A dark header and hero, then a light workspace. Five destinations in one nav. No login wall, no modal, no toast, and no empty-state illustration. Placeholder art is the colored spot grid and the scanner frame. There is no image asset in the repo.
+VERIFIED: one shell, nav items Overview, Manager, Resident, Guest Portal, Enforcement. No login. The resident editor has a status dropdown including Approved. The enforcement form has Tow dispatched. The manager grid is numbered spots. Guest registration is a form on the same origin, not a private link.
 
-### 2.2 PROPOSED
+Open pull request #2 adds a yellow banner, text exactly "Demo — all names, plates, phones and locations are fictional." That banner is on the prototype branch, not merged (VERIFIED). The pilot is a different audience. Whether the pilot shows that sentence is PROPOSED: yes, on any non-production build. The production pilot shows a shorter privacy line only if counsel asks. Counsel has not (UNKNOWN).
 
-A true map, drag-and-drop, a QR code, a camera viewfinder backed by a device, a file upload, session extension, and role-specific navigation. The current screens mention several of these. None are interaction patterns yet. Whether to design them is Q-004.
+### 2.2 Pilot surfaces
+
+| Surface | Who | Account |
+| --- | --- | --- |
+| Vehicle and passes | Resident | Yes |
+| Plate check and warning | Patroller | Yes |
+| Queue, config, export | Admin | Yes |
+| Authorization draft and sign | Signer | Yes, extra permission |
+| One pass | Guest | Link only |
+| Tow company | Nobody | No screen |
+
+There is no community switcher (non-goal).
 
 ## 3. Success
 
-A UX change matches this spec when a person can, on a 320px-wide viewport and on a desktop viewport:
-
-1. Tell which of the five destinations is current.
-2. Finish a guest registration, a permit edit, a spot assignment, and a violation log using only the visible controls.
-3. See that edit on another destination without being told to refresh.
-4. Refresh and recognize the original sample scene.
-
-Visual novelty is not a success metric. None is stated in the product.
+A person in a role can finish S-1 through S-5 without seeing another community's plates (PROPOSED, UNAPPROVED). A resident never sees a control that approves their own vehicle (PAC-020).
 
 ## 4. Non-goals
 
-| Non-goal | What the prototype does instead |
+| Non-goal | Reason |
 | --- | --- |
-| A design system with tokens, theming, or a component library | One CSS file and two shared components, `SectionHeading` and `Panel` |
-| Accessibility certification | Keyboard use is whatever native controls provide. Contrast is not measured. See section 8 |
-| Distinct products for resident, guest, manager, and patrol | One chrome, five pages, no role switcher because there is no account |
-| Copywriting a market claim | Copy is quoted here so it can be checked. Claims are judged in `GTM_STRATEGY.md` |
-| Fixing misleading badges inside this docs pass | The badges stay until Henry answers Q-004. The spec marks them |
+| Restyle the marketing overview as the pilot home | The pilot starts at a task, not at the prototype hero (INFERRED) |
+| Drag-and-drop stalls | Numbered spots are out |
+| A camera viewfinder | Plate cameras are out. Photos are uploads |
+| A "Dispatch tow" button | PAC-052 |
+| Guest accounts, guest nav, or a list of other visits | PAC-009 |
 
-## 5. Information architecture
+## 5. Resident
 
-### 5.1 Destinations
-
-The nav order is the product order.
-
-| Label | Route | Job of the screen |
+| Region | Content | Rule |
 | --- | --- | --- |
-| Overview | `#/` | Pitch, sample metrics, and doors into the four workspaces |
-| Manager | `#/manager` | Spot grid, assignment form, permit queue, violation feed |
-| Resident | `#/resident` | Searchable permit list and one editor |
-| Guest Portal | `#/guest` | Registration form and session list |
-| Enforcement | `#/enforcement` | Plate form styled as a scanner, and the incident list |
+| Vehicles | List of this resident's vehicles and statuses `pending_review`, `approved`, `rejected`, `revoked` | No status control. Copy explains that an admin approves (PROPOSED) |
+| Submit | Plate and description. Save | Resulting status is pending. If they edit an approved row, the screen shows pending again (PAC-023) |
+| Passes | Form: plate, start, end. Optional phone only if Q-008 is yes | Submit disabled, with the reason, when the cap would fail (PAC-003, PAC-004) |
+| Own list | Their passes and times | Not other residents (PAC-031, Q-017) |
 
-Unknown hashes return to Overview. The back control returns to the previous real page because the redirect uses replace.
+The prototype's Approved / Review needed / Revoked dropdown is removed for this role (VERIFIED that it exists today).
 
-### 5.2 Shell
+## 6. Guest link
 
-The header is a rounded dark bar. Left: the word "Zonr" in a serif face, and the line "Smart parking operations for residential communities." Right: the five links as pills. The active pill is the brighter gradient. At the 720px breakpoint the header stacks and the nav wraps.
+One page. No app nav. Shows plate, start, end, status (`active`, `expired`, `revoked`), and the community's guest-rule text (PAC-009, PROPOSED).
 
-The page column is `min(1240px, 100% - 32px)`, reduced to a 20px gutter at 720px. Body minimum width is 320px.
+Does not show phone, photos, the host's other passes, or a map of stalls. A dead or unknown token is a single "this link is not valid" line, the same for unknown and revoked, so the page does not reveal which (PROPOSED). That sameness is a privacy choice, not a legal rule.
 
-Below the hero, the background of the page turns light (`#f3efe7` from 44% of the viewport height). Workspace text switches to dark. The header and hero stay light-on-dark. This split is IMPLEMENTED in the root background gradient. It is not a theme toggle.
+## 7. Patroller
 
-### 5.3 Shared panel pattern
-
-Workspace screens use a heading row: an uppercase eyebrow, a serif title, and a description. Panels have a kicker, a title, an optional pill badge, and a body. The manager spot panel is the only `large` panel; it spans two columns until the 1080px breakpoint, where the grid becomes one column.
-
-## 6. Screen specifications
-
-### 6.1 Overview
-
-| Region | Content | Live or fixed |
+| Region | Content | Rule |
 | --- | --- | --- |
-| Hero | Eyebrow "Proptech parking orchestration". Headline "Zonr turns every residential lot into a live, enforceable system." Paragraph beginning "Replace hangtags, disconnected spreadsheets, and manual patrol ambiguity". Buttons "Explore manager view" and "Launch guest portal" | Fixed copy. Buttons navigate |
-| Live Ops card | "{n} spots monitored" and "{sessions} guest sessions, {incidents} active incidents, 2 tow escalations pending." | Counts are live. The 2 is fixed. AC-012 |
-| Smart Decals card | "{n} decal accounts live" and a sentence about residents leaving stickers and office visits | The count is live. The sentence is fixed. AC-013 |
-| Stat row | Four cards, label, large value, green delta | Live strings. Only "Guest sessions today" changes, and only after a guest submit. AC-014, AC-034 |
-| Role row | Four cards. Titles are also repeated as a small label above the serif title | Fixed. Each card has one text button. AC-015 |
-| Blueprint | Four panels: Interactive Smart Map, Permit lifecycle, QR session simulation, Violation logging | Fixed. AC-016 |
+| Plate check | One plate field and a result | Result is approved vehicle, active pass with end time, warning with grace end, or no record (PAC-030, PAC-033) |
+| Hidden | Phone, other people's vehicles, export, config, sign | PAC-031 |
+| Warning | Plate (filled from the check), reason, one or more photos, submit | Submit stays unavailable until a photo is attached (Q-007). There is no action menu of citation or tow dispatched |
+| After submit | Grace end time | No button that signs an authorization |
 
-Role-card promises, quoted so they stay attached to the screen:
+The prototype scanner that displays a typed plate and the sentence "Permit status checked against Zonr records" does not perform a lookup (VERIFIED). The pilot result list replaces that sentence. Do not keep the sentence if the lookup can fail. Show the failure (section 9).
 
-| Card | Paragraph | What the linked screen actually offers |
-| --- | --- | --- |
-| Property Manager | "Monitor occupancy, drag assignments across spots, and keep policy enforcement visible." | Monitor and edit, yes. Drag, no. AC-044 |
-| Resident | "Update vehicles, upload docs, and manage permits without office back-and-forth." | Update vehicle and a checkbox, yes. Upload, no. AC-053 |
-| Guest | "Launch QR-based sessions with no app download and clear extension-ready timing." | A form in this same site, yes. QR and extension, no. AC-036, AC-053 |
-| Enforcement | "Verify plates in the field, log incidents, and escalate repeat offenders faster." | Log an incident, yes. Verify against permits, or escalate to a person, no. AC-050 |
+## 8. Admin and signer
 
-Primary buttons use the green-to-blue gradient and dark text. Secondary buttons are ghost pills. On the light workspace the same primary class is reused, so those buttons stay bright.
+Admin:
 
-### 6.2 Manager
-
-Eyebrow "Property Manager". Title "Assign spaces, monitor occupancy, and orchestrate enforcement". Description "The smart map, permit roster, and incident activity all respond to the same source of truth."
-
-| Panel | Badge | Interaction |
-| --- | --- | --- |
-| Interactive Smart Map | Drag-and-drop ready | Legend plus a grid of spot buttons. Click to select. No drag. AC-037, AC-044 |
-| Assignment Editor | The selected spot id, or "Pick a spot" | Four fields and "Save assignment". Unit, name, and plate are single-line inputs. Status is a select of Resident, Guest, Open, Violation. AC-039 through AC-041 |
-| Permit Queue | PMS sync next | Read-only rows. Right column is the status and "Docs on file" or "Awaiting docs". AC-042 |
-| Violation Feed | "{n} active" | Read-only rows: plate, reason, action, zone. AC-043 |
-
-Legend swatches and spot fills are the same colors: open `#71d87b`, resident `#53a3ff`, guest `#f0c54f`, violation `#e76a6a`. Spot text is `#07111f`. A selected spot has a 3px dark outline. The status name is not printed on the spot. The note text and the legend carry the meaning. Color is doing a lot of the work. That is an observation, not a passed contrast check.
-
-The spot grid is four columns, two columns under 1080px, one column under 720px. Spot buttons are at least 112px tall.
-
-### 6.3 Resident
-
-Eyebrow "Resident Portal". Title "Self-service permits with manager-friendly review context". Description "Vehicle changes update locally now and can later be wired straight into a real permits API." That sentence is the UI's own IMPLEMENTED versus PROPOSED split. Keep it, or replace it, only with Henry's answer to Q-004.
-
-| Panel | Badge | Interaction |
-| --- | --- | --- |
-| Permit Directory | "{n} matches" | A search field labeled "Search residents, units, vehicles, or plates". Rows are buttons. The active row is tinted blue. AC-017 through AC-019, AC-027 |
-| Permit Editor | The current plate | Resident is read-only. Vehicle, plate, status, registration checkbox, then "Save permit". AC-021 through AC-026 |
-
-The editor does not show permit type, even though the data has it. A reviewer cannot tell smart-decal from plate-based from temporary on this screen. The overview Smart Decals count is the only type readout.
-
-Search does not announce results. The badge count is the only confirmation. A query with no matches leaves a blank list and the previous editor. AC-027.
-
-### 6.4 Guest
-
-Eyebrow "Guest Portal". Title "Simulate the QR registration experience". Description "This is the no-download guest flow: capture a plate, phone number, stay duration, and parking zone."
-
-| Panel | Badge | Interaction |
-| --- | --- | --- |
-| Virtual Parking Attendant | QR entry | Form. "Start guest session" submits. Fields clear after a valid submit. AC-028, AC-029 |
-| Guest activity | "{n} sessions" | Read-only rows: name, plate, host unit, "{n} min left", zone. AC-035, AC-036 |
-
-There is no QR graphic, no code to scan, and no countdown. Rows with `expiresSoon: true` in the seed look the same as rows with it false. The 11-minute and 7-minute seed sessions are not visually urgent.
-
-Required fields use browser validation. The spec does not restyle the validation bubble.
-
-### 6.5 Enforcement
-
-Eyebrow "Enforcement". Title "Verify plates, create incidents, and escalate repeat offenders". Description "Patrol activity updates the incident roster and flips related spots into violation state."
-
-| Panel | Badge | Interaction |
-| --- | --- | --- |
-| LPR Scan | Camera-ready | A dark card with the pill "Live recognition", a frame showing the plate in wide letter-spacing, a decorative scan line, and the caption "Permit status checked against Zonr records". Under it, the form. AC-045, AC-050 |
-| Incident Feed | "{n} incidents" | Rows: plate, reason, "{n} photo(s)", action, zone, GPS stamp. AC-049 |
-
-The scan line does not move. CSS sets it at 34% from the top. "Live" is a label.
-
-The form's initial plate `8GKF204` is a seed violation, so the first paint already looks like a hit. That is demo staging, not a lookup.
-
-Actions are ordered Warning, Citation, Tow watchlist, Tow dispatched. Nothing on the screen explains the difference. Q-011.
-
-## 7. Feedback and state
-
-| State | What the person sees |
+| Region | Content |
 | --- | --- |
-| Loading | One sentence in light text. No skeleton, no spinner. AC-007 |
-| Ready | The workspace for that route |
-| Save in flight | Lists and grids update when the 180ms write resolves. The button stays pressable. The guest form is the exception: its fields clear immediately, and the new session row appears when the write resolves. AC-010, AC-029, AC-056 |
-| Guest validation error | The browser's built-in required-field UI. No custom error text |
-| Assignment with no spot | The form submits and the dashboard does not change. No message. AC-040 |
-| Successful guest, permit, assignment, or violation | The relevant list or grid updates in place. No confirmation banner |
-| Reload | The seed scene returns. There is no "unsaved" warning. AC-009 |
-| Missing provider | Not a designed screen. The hook throws. The shipped tree does not hit this |
+| Vehicle queue | Pending rows. Actions: Approve, Reject. No bulk approve of a whole import (not in scope) |
+| Revoke | On an approved vehicle, with a confirm step (PROPOSED) |
+| Config | Stay cap, month cap, month-cap subject, grace, guest-rule text. Save refuses an empty cap or empty grace (PAC-100) |
+| Export | One button for this community. Shows success or failure. Does not download another community (PAC-060) |
 
-There is no success toast. The updated row is the confirmation. That is easy to miss on the overview stat, which is not on the guest page. A person who stays on the guest page sees the new session and does not see the stat move until they open Overview.
+Signer, only if the account has that permission:
 
-## 8. Accessibility and viewport notes
-
-IMPLEMENTED facts, not an audit:
-
-| Topic | What the code does |
+| Region | Content |
 | --- | --- |
-| Language | `index.html` sets `lang="en"` |
-| Landmarks | A `header` and a `nav`. Pages are `section` elements. There is no `main` and no skip link |
-| Names | Form fields are wrapped in `label` elements, so the visible caption is the accessible name. Icon-only controls do not exist |
-| Keyboard | Links, buttons, inputs, selects, and the checkbox are native. Tab order follows the document. No shortcut keys |
-| Focus | No custom `:focus` style. Selection uses `.active` and `.selected` outlines, which are click state, not focus state |
-| Motion | Hover lifts links, buttons, and spots by 1px. `scroll-behavior: smooth` is set. The scan line does not animate. No `prefers-reduced-motion` rule |
-| Breakpoints | 1080px collapses the hero, the section heading, and the workspace to one column and drops the stat, role, and spot grids to two columns. 720px stacks the header, panel headers, and list rows, and those grids become one column |
-| Hit size | Text inputs and selects set `min-height: 44px`. Primary and secondary buttons set `min-height: 46px`. Spot buttons set `min-height: 112px` |
-| Color | Status is a full-spot fill plus a legend on the manager screen only. Other screens spell the status in text |
-| Live regions | Loading text and list updates are not `aria-live` |
-| Contrast | Not measured in this spec. Do not claim WCAG conformance |
+| Eligible warnings | Violations in `grace_elapsed` that have no `signed` authorization |
+| Draft | Upload the writing. The screen does not claim the upload satisfies CVC §22658 (Q-016) |
+| Sign | Confirm. Result is `signed`. No "call tow" and no vendor name field that sends data |
+| Void | Reason required |
 
-UNKNOWN: target language beyond English, a required conformance level, and whether patrol use is outdoors in sunlight. Those would change this section. They are not in the repo.
+If the same person is admin and signer, the nav shows both groups (Q-014, PROPOSED). The approve button and the sign button are not the same control.
 
-## 9. Content rules the UI already follows
+## 9. Feedback
 
-| Rule | Where it shows up |
-| --- | --- |
-| Product name is "Zonr", one word, capital Z | Header, title, loading copy |
-| Zone names are North Court, Clubhouse, East Garage | Seed, guest select, enforcement select, spot captions |
-| Permit statuses display as Approved, Review needed, Revoked in the editor, and as the raw values `approved`, `review`, `revoked` in the directory and the manager queue | Resident editor versus the row renderers, which print `permit.status` |
-| Violation actions display as the raw values `warning`, `citation`, `tow-watch`, `tow-dispatched` in lists. The editor labels them Warning, Citation, Tow watchlist, Tow dispatched | Enforcement list versus the select |
-| Spot statuses are not printed as words on the grid. The assignment select uses Resident, Guest, Open, Violation | Manager |
-| Plates are shown as stored | Uppercase when the guest or violation or permit write uppercased them. Assignment does not uppercase |
+| State | What the person sees | Label |
+| --- | --- | --- |
+| Loading | The task's own loading line. Not another community's data | PROPOSED |
+| Cap refused | The cap name and that the pass was not created | PROPOSED |
+| Missing config | "This community's rules are not set." Admin sees a link to config. Others do not | PROPOSED |
+| Photo failed | Warning not filed. Photos can be attached again | PROPOSED |
+| Sign refused | Grace has not ended, or the account cannot sign. No partial signed state | PROPOSED |
+| Export failed | No file, and a retry. The audit notes the failure | PROPOSED |
+| Reload | Pilot data remains (PAC-090). The mock's reload-to-seed behavior is not this product (VERIFIED for the mock) | PROPOSED |
 
-The raw-versus-labeled split is IMPLEMENTED. It is inconsistent. Whether list rows should use the same words as the selects is undecided. It is not one of Henry's product questions unless he wants a voice rule.
+## 10. Accessibility notes for the pilot
 
-## 10. Open questions
+Not a conformance claim (UNKNOWN whether a level is required).
 
-Q-004 decides which badges and hero sentences must be redesigned or removed. Q-006 decides whether the resident editor should keep a status control. Q-008 and Q-009 decide whether the guest list needs urgency, extension, and expiry. Q-011 decides whether tow actions need a confirmation step. Q-012 and Q-013 decide whether the overview numbers should look like a dashboard or like a brochure. This spec does not pick for him.
+PROPOSED minimum: labeled fields, errors in text not only color, photo control is a real file input, guest link works without an account and without a hover-only action. The prototype's native labels are VERIFIED. Its status colors on spots are not reused, because stalls are not a pilot screen.
+
+## 11. Questions
+
+Q-003, Q-007, Q-008, Q-009, Q-010, Q-014, and Q-017 decide copy and which controls exist. Q-016 forbids a screen that says the upload is legally sufficient.

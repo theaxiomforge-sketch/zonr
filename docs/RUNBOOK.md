@@ -1,199 +1,147 @@
-# Zonr runbook
+# Zonr runbook — demo and pilot
 
-Baseline: main `99d283e`. Two operating facts belong here. The GitHub Pages pipeline is IMPLEMENTED in `.github/workflows/deploy-pages.yml` and has run. The D-053 pull-request-only workflow is the rule this documentation change followed. It is not implemented as a GitHub control.
+Two different systems. The GitHub Pages demo is live. The pilot is a design and is not deployed.
+
+Code baseline: `main` `99d283e` (VERIFIED). Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. Success criteria for the pilot are UNAPPROVED.
 
 ## 1. Purpose
 
-Tell a person how the public demo is built and published, how to run the same app locally, and how a change is allowed to reach `main` under D-053.
+Operate the public demo without pretending it is the HOA pilot, and state how a change is allowed to reach `main`.
 
 ## 2. Scope
 
 | In scope | Out of scope |
 | --- | --- |
-| The Pages workflow, its triggers, the live URL, and the three recorded runs | A general GitHub Actions tutorial |
-| Local `npm` commands that exist in `package.json` | Adding Node, npm, or packages to a machine image |
-| What D-053 requires for this repository, and what the repo does not enforce | Inventing branch-protection settings the token could not read |
-| What to do when a Pages job fails | On-call staffing, status pages, or an SLA. None exist. UNKNOWN |
+| Pages workflow, URL, and recorded runs | An SLA (UNKNOWN) |
+| D-053 pull-request rule and what GitHub does not enforce | Inventing branch protection. The protection API returned HTTP 403 on the earlier read (VERIFIED as that 403, not as "unprotected") |
+| What must not be done with pilot data on the demo | Tow dispatch, because there is no such integration to operate |
 
 ## 3. Success
 
-| Situation | Success looks like |
-| --- | --- |
-| Local review | `npm run dev` serves the five routes, and `npm run build` exits 0 |
-| Demo update | A green `Deploy To GitHub Pages` run on `main` leaves `https://theaxiomforge-sketch.github.io/zonr/` serving the new bundle |
-| A product or docs change | The change is on a non-`main` branch and is opened as a pull request. It is not pushed straight to `main` |
-
-There is no uptime target. Q-016 and Q-019.
+| Situation | Success | Label |
+| --- | --- | --- |
+| Demo | A green Pages run on `main` updates https://theaxiomforge-sketch.github.io/zonr/ | VERIFIED as the pipeline's job. Uptime target UNKNOWN |
+| A change | It arrives by a pull request, not a direct push, under the operating rule called D-053 | The rule is the instruction used for these docs. Enforcement is not in the repo (section 7) |
+| Pilot | Not applicable. No pilot environment exists | VERIFIED by absence |
 
 ## 4. Non-goals
 
 | Non-goal | Why |
 | --- | --- |
-| Deploying from a pull request | The workflow trigger is `push` to `main` and `workflow_dispatch` only |
-| A staging environment | One Pages site, one environment named `github-pages` |
-| Rollback automation | Not in the workflow. Section 6.4 is the manual path |
-| Enforcing D-053 inside GitHub | Not done. Section 7 says what was verified |
-| Monitoring, alerting, or log shipping | The app has no logger. Actions stores the workflow log |
+| Host resident plates, photos, or phones on Pages | The site is public (VERIFIED). Pilot data stays off it (PROPOSED) |
+| Add a tow-vendor secret to the workflow | Dispatch is out of scope. PAC-052 |
+| Deploy the pilot from this runbook | The pilot is not built |
+| Force-push `main` or merge from the authoring session | D-053 as practiced on the docs and demo pull requests |
 
-## 5. System
+## 5. Demo system
 
-| Item | Value |
-| --- | --- |
-| Repository | `theaxiomforge-sketch/zonr`, public |
-| Default branch | `main` |
-| Demo | `https://theaxiomforge-sketch.github.io/zonr/` |
-| Pages source | GitHub Actions workflow. API reports `build_type: workflow`, source branch `main`, path `/` |
-| HTTPS | Enforced on the Pages site |
-| App path | `/zonr/` plus a hash route, for example `/zonr/#/manager` |
-| Artifact | `./dist` from `npm run build` |
-| Workflow file | `.github/workflows/deploy-pages.yml` |
-| Workflow name | Deploy To GitHub Pages |
-| Environment | `github-pages` |
-| Node in CI | 24, with `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` |
-| Concurrency | Group `pages`, `cancel-in-progress: true` |
-
-The live HTML as checked for this run returned 200, `content-type: text/html`, and `last-modified: Mon, 30 Mar 2026 05:35:00 GMT`. That timestamp matches the successful Node 24 run in section 6.3. The bundle referenced `/zonr/assets/index-5KVJI3YX.js` and a sibling CSS file. Those hashes change when the build changes. Do not treat the hashes as stable.
-
-Who owns the GitHub account and who is allowed to dispatch the workflow is UNKNOWN. Q-019.
-
-## 6. GitHub Pages deploy
-
-### 6.1 When it runs
-
-| Trigger | Runs the workflow | Publishes the site |
+| Item | Value | Label |
 | --- | --- | --- |
-| Push to `main` | Yes | Only if the deploy job succeeds |
-| `workflow_dispatch` | Yes | Only if the deploy job succeeds |
-| Pull request | No | No |
-| Push to any other branch | No | No |
+| Repository | `theaxiomforge-sketch/zonr`, public | VERIFIED |
+| Demo URL | https://theaxiomforge-sketch.github.io/zonr/ | VERIFIED. Pages `build_type` workflow, branch `main`, HTTPS on |
+| App paths | `/zonr/#/`, `/zonr/#/manager`, `/zonr/#/resident`, `/zonr/#/guest`, `/zonr/#/enforcement` | VERIFIED (`HashRouter`, Vite `base` `/zonr/`) |
+| Workflow | `.github/workflows/deploy-pages.yml`, name "Deploy To GitHub Pages" | VERIFIED |
+| Node | 24, plus `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` | VERIFIED |
+| Artifact | `dist/` from `npm run build` | VERIFIED |
+| Concurrency | Group `pages`, cancel in progress | VERIFIED |
+| Who owns the GitHub account | UNKNOWN (`PRD.md` does not assign an owner beyond the repo) | UNKNOWN |
 
-A docs-only change to `main` still runs the workflow, because the trigger is the branch, not a path filter. The build does not read the markdown.
+### 5.1 When a deploy runs
 
-### 6.2 What the jobs do
+| Trigger | Runs | Publishes |
+| --- | --- | --- |
+| Push to `main` | Yes | If the deploy job succeeds |
+| `workflow_dispatch` | Yes | If the deploy job succeeds |
+| Pull request, including this docs PR and the demo-plate PR | No | No |
 
-Permissions on the workflow token: `contents: read`, `pages: write`, `id-token: write`.
+A docs-only merge to `main` still builds, because there is no path filter (VERIFIED). The build does not read the markdown. It will still publish a new bundle of the same app.
 
-Job `build`, on `ubuntu-latest`:
+### 5.2 Jobs
 
-1. `actions/checkout@v4`
-2. `actions/setup-node@v4` with Node 24 and the npm cache
-3. `npm ci`
-4. `npm run build`
-5. `actions/configure-pages@v5`
-6. `actions/upload-pages-artifact@v3` with `path: ./dist`
+Build: checkout, Node 24, `npm ci`, `npm run build`, configure Pages, upload `dist/`. Deploy needs build and runs `deploy-pages` in the `github-pages` environment (VERIFIED).
 
-Job `deploy` needs `build`. It runs `actions/deploy-pages@v4` in the `github-pages` environment. The environment URL is the deployment step's `page_url`.
+If build fails, deploy is skipped and the previous site remains. That follows from `needs: build` (VERIFIED as the workflow shape).
 
-If `build` fails, `deploy` does not run. The previous successful Pages deployment stays what visitors see. That follows from `needs: build`. It is not a separate rollback step.
+### 5.3 Recorded runs
 
-`cancel-in-progress` means a newer `main` push cancels an in-flight Pages run in the same concurrency group. The cancelled run does not publish. The later run does, if it succeeds.
-
-The `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` variable was added in `99d283e` ("Opt Pages workflow into Node 24"). The setup step was already requesting Node 24 in the earlier workflow. The variable forces Actions' own JavaScript actions onto Node 24. Leave it in place unless GitHub withdraws the opt-in. Do not bump the action major versions in a drive-by.
-
-### 6.3 Recorded runs
-
-| Run | Event | Head | Result |
+| Run | Head | Result | Label |
 | --- | --- | --- | --- |
-| [23728281604](https://github.com/theaxiomforge-sketch/zonr/actions/runs/23728281604) | push of `f23ae13`, "Add GitHub Pages deployment" | `f23ae1335a8dc248870294f0cbcc17cf9f08c8aa` | Failed. The build job failed and the deploy job was skipped. The log download returns HTTP 410. Cause UNKNOWN |
-| [23729407085](https://github.com/theaxiomforge-sketch/zonr/actions/runs/23729407085) | `workflow_dispatch` at 2026-03-30 05:28 UTC | `f23ae1335a8dc248870294f0cbcc17cf9f08c8aa` | Succeeded. Same commit as the failed push |
-| [23729580260](https://github.com/theaxiomforge-sketch/zonr/actions/runs/23729580260) | push of `99d283e` | `99d283e9e7aad854559df145ea4834fab428fec1` | Succeeded |
+| [23728281604](https://github.com/theaxiomforge-sketch/zonr/actions/runs/23728281604) | `f23ae13` | Build failed, deploy skipped. Log download HTTP 410. Cause UNKNOWN | VERIFIED outcome. Cause UNKNOWN |
+| [23729407085](https://github.com/theaxiomforge-sketch/zonr/actions/runs/23729407085) | `f23ae13` | `workflow_dispatch` succeeded. Same commit as the failure | VERIFIED. The red build was not a source change that remained |
+| [23729580260](https://github.com/theaxiomforge-sketch/zonr/actions/runs/23729580260) | `99d283e` | Push succeeded | VERIFIED |
 
-The failed push and the later green dispatch are the same commit, so that red build is not a source bug still sitting in the tree. Do not invent a root cause. The log is gone. The site is serving the `99d283e` build.
+### 5.4 Demo data
 
-### 6.4 Publish, check, and go back
+`main` still serves the original seed plates and the three phones `(310) 555-0188`, `(424) 555-0173`, and `(800) 555-0100` (VERIFIED at `99d283e`). Those phones are inside `555-0100`–`555-0199` (VERIFIED by reading them).
 
-Publish:
+Pull request #2, not merged, replaces eight licence plates with `DEMO001`–`DEMO008` and adds the banner "Demo — all names, plates, phones and locations are fictional." (VERIFIED on that branch). `TEMP-QR` is unchanged there. Merging #2 updates the demo only after it reaches `main` and the Pages job succeeds.
 
-1. Land the commit on `main` by the path in section 7. A direct push also publishes, because the trigger does not care. D-053 says not to use that path.
-2. Open Actions and watch `Deploy To GitHub Pages`.
-3. When the deploy job is green, load `https://theaxiomforge-sketch.github.io/zonr/` and one hash route, `#/manager`. Hard-refresh. GitHub's edge cache on the HTML checked here was `max-age=600`. A stale page for a few minutes is consistent with that header.
-4. Confirm the document title "Zonr | Smart Parking Operations" and that the overview leaves its loading sentence.
+Do not load the pilot HOA's plates, photos, or phones into this site (PROPOSED).
 
-The app assets are hashed. The HTML file is what points at them. A cached HTML file can point at assets that still exist from that build. It should not point at a half-written deploy, because the deploy job publishes a finished artifact.
+## 6. Local demo commands
 
-Go back:
+| Step | Command | Label |
+| --- | --- | --- |
+| Install | `npm ci` | VERIFIED script via npm |
+| Dev | `npm run dev` | App is under `/zonr/` because `base` is `/zonr/` (VERIFIED) |
+| Build | `npm run build` | `tsc && vite build` (VERIFIED) |
+| Preview | `npm run preview` | Serves `dist/` |
+| Lint | `npm run lint` | No script (VERIFIED). Exit is the npm missing-script error |
+| Test | `npm test` | No script (VERIFIED) |
 
-1. There is no rollback button in this repo.
-2. Revert the bad commit on a branch, open a pull request, and merge it to `main` under section 7. The new green deploy replaces the site.
-3. Dispatching the workflow again republishes the current `main`. It does not republish an older commit unless `main` has moved back.
-4. Redeploying an older SHA by checking it out and pushing it onto `main` is a history rewrite or a revert. Do not force-push `main`. D-053 and the request that opened this docs change both forbid a force-push.
+There is no `.env` and no API secret in the demo (VERIFIED). Do not add one to reach a tow vendor.
 
-### 6.5 Failure
-
-| Symptom | What to do |
-| --- | --- |
-| `npm ci` fails | Lockfile and `package.json` disagree, or the npm registry was unreachable. Read the job log. Do not switch the workflow to `npm install` to get past it |
-| `npm run build` fails | `tsc` failed or Vite failed. The site is unchanged. Fix on a branch |
-| Deploy job fails after a green build | The artifact was produced and not published. The previous site remains. Re-run the workflow from the Actions tab once the Pages environment is healthy. Cause is in that job's log |
-| Site 404s at `/zonr/` | Confirm Pages is still `build_type: workflow` and the last deploy job was green. Confirm `vite.config.ts` still has `base: "/zonr/"` |
-| Deep link 404s | Use the hash form `/zonr/#/manager`. The server does not rewrite `/zonr/manager` to `index.html`. That path is not a route the host understands |
-| Workflow did not start | The push was not to `main`. Pull requests do not deploy |
+Reset the demo's data: reload the browser. The module seed returns (VERIFIED). That reset is not a pilot procedure.
 
 ## 7. D-053 pull-request-only workflow
 
 ### 7.1 The rule
 
-D-053, as given for this repository's documentation work: changes reach `main` only through a pull request. Do the work on a new branch that is not `main`. Open one pull request. Do not merge it from the authoring session unless the reviewer asks. Do not force-push. Do not comment on the pull request unless asked.
+D-053, as followed for this repository's docs and for the demo-plate change: work is done on a branch that is not `main`, pushed normally, and opened as a pull request. Do not force-push. Do not merge from the authoring session unless a reviewer asks. Do not comment on the pull request unless asked.
 
-This docs change follows that rule. The branch is not `main`. The pull request is the delivery.
+The exact policy text, the required reviewers, and whether docs and product code share reviewers are UNKNOWN (`PRD.md` does not settle them; the earlier question stands as an operations unknown).
 
-The exact policy text, the required reviewers, and whether documentation needs the same reviewers as product code are UNKNOWN. Q-018. Henry approved opening the docs pull request. That approval is not a written D-053 charter in the repo.
+### 7.2 What the repo enforces
 
-### 7.2 What the repository enforces
-
-Verified while writing this runbook, against `main` at `99d283e`:
-
-| Control | Observed |
+| Control | Observed at the docs rewrite |
 | --- | --- |
-| Commits on `main` | Three: `5eea8d1` "Build Zonr parking operations app", `f23ae13` "Add GitHub Pages deployment", `99d283e` "Opt Pages workflow into Node 24". All are ordinary commits. None is a merge commit |
-| Pull requests | None open or closed |
-| Rulesets | The rulesets API returned an empty list |
-| Branch protection | The branch-protection API returned HTTP 403 for this token. Whether protection is on is UNKNOWN. Do not read the 403 as "unprotected" |
-| A workflow that rejects direct pushes | None. The only workflow deploys Pages. It will publish a direct push to `main` |
-| CODEOWNERS, a pull-request template, required reviews in repo files | None present |
+| History of `main` | Three direct commits through `99d283e`. No merge commit in that history (VERIFIED) |
+| Pull requests | #1 docs, open. #2 demo plates, open. Neither merged at the time of this rewrite (VERIFIED) |
+| A workflow that rejects a direct push | None (VERIFIED). A direct push to `main` would still run Pages |
+| Rulesets | Empty list on the earlier read (VERIFIED then). Re-check before relying on it |
+| Branch protection | HTTP 403 to this token earlier (VERIFIED as the error). Current setting UNKNOWN |
 
-D-053 is an operating instruction. It is not a control. A person with push access can still update the demo by pushing `main`. The instruction says not to.
+D-053 is an operating instruction. It is not a control.
 
-### 7.3 How to land a change under D-053
+### 7.3 Landing a change
 
-1. Start from `main` at `99d283e` or a later commit on `main`.
-2. Create a new branch. Do not commit on `main`.
-3. Keep the change inside the request. For this pass, that meant markdown only.
-4. Push the branch and open one pull request into `main`.
-5. Leave it for review. Merging, force-pushing, and drive-by comments are out of the authoring session.
-6. After a merge, section 6 runs because the merge is a push to `main`.
+1. Branch from current `main`.
+2. Commit and push the branch. No force-push.
+3. Open or update one pull request into `main`.
+4. Leave merge to the reviewer.
+5. After a merge, section 5.1 runs because the merge is a push to `main`.
 
-### 7.4 What D-053 does not require
+## 8. Pilot operations
 
-| Not required by the observed rule | Note |
-| --- | --- |
-| A green test suite | No test suite exists. `TEST_PLAN.md` |
-| A Pages preview for the branch | The workflow ignores branches other than `main` |
-| Squash versus merge | UNKNOWN. Q-018 |
-| A signed commit | Not configured in anything this runbook could see |
+There is no pilot host, database, backup, or on-call (VERIFIED by absence). When a pilot environment exists, this section has to be rewritten. Until then:
 
-## 8. Local operation
-
-| Step | Command | Notes |
+| Topic | Rule | Label |
 | --- | --- | --- |
-| Install | `npm ci` | Uses the lockfile. Prefer this over `npm install` when reproducing CI |
-| Dev server | `npm run dev` | Vite. `base` is `/zonr/`, so the local app is `http://localhost:<port>/zonr/#/` and the manager is `http://localhost:<port>/zonr/#/manager`. The port is Vite's default unless it is already taken |
-| Production build | `npm run build` | `tsc && vite build`. Writes `dist/`, which is gitignored |
-| Serve the build | `npm run preview` | Serves `dist/` under the same `/zonr/` base |
+| Data store | Not the Pages site | PROPOSED |
+| Tow dispatch | No runbook step. The product has no such action | PROPOSED, PAC-052 |
+| Secrets | None for a tow vendor | PROPOSED |
+| Export for a dispute | An admin or signer action in the future product, per community | PROPOSED, PAC-060. Not available today |
+| Retention | Do not delete or keep on a schedule that has not been chosen | UNKNOWN, Q-011, RADAR for California privacy applicability |
+| Legal content of an authorization | Do not improvise from memory. Ask RADAR | UNKNOWN, Q-016 |
+| Henry as a required operator | The design forbids a person-specific permission | PROPOSED, I-11 |
 
-Node 24 matches CI. Another current Node may run Vite. If it does not match CI, believe the workflow.
+## 9. Questions
 
-There is no `.env`, no secret, and no API key. The mock does not call the network. Do not add credentials to the Pages workflow to "finish" the prototype. A real backend's secrets are a design that Q-001 through Q-015 have not authorized. See `TECHNICAL_DESIGN.md` section 8.
-
-Data reset for a confused reviewer: reload the browser. There is no admin reset and no database to wipe.
-
-## 9. Open questions
-
-| Id | What operations needs from Henry |
+| Id | What operations needs |
 | --- | --- |
-| Q-018 | The exact D-053 text, who may approve and merge, and whether GitHub should reject a direct push |
-| Q-019 | Whether the Pages URL is canonical, and who owns the account and the `github-pages` environment |
-| Q-015 | Whether this public demo is allowed to keep rendering plates, phones, and GPS once the data is no longer a seed |
-| Q-016 | Whether a green Pages deploy is the operational success condition, or whether something else is |
+| Q-011 | Retention, before any pilot backup policy is written. RADAR on California privacy applicability |
+| Q-012 | Whether a contract exists before any real plate is stored |
+| Q-016 | RADAR, before anyone treats a PDF in the product as a complete authorization |
+| Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
 
-The other product questions are in `PRD.md`. They do not change the deploy steps.
+D-053's reviewer list remains UNKNOWN until Henry writes it down.

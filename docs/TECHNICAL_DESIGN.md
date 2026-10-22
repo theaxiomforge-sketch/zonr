@@ -1,206 +1,162 @@
-# Zonr technical design
+# Zonr technical design — pilot
 
-Baseline: main `99d283e`. This document describes the client that is in the repository. Section 8 is the PROPOSED boundary for a backend. It is not an architecture decision.
+Code baseline: `main` `99d283e` (VERIFIED). Pilot behavior: `FRD.md`. This file is the record shape. It is PROPOSED. It is not a deployed service. Success criteria that depend on it are UNAPPROVED (`PRD.md` section 4).
+
+Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. Statute text is UNKNOWN and is not designed here. Route it to RADAR.
 
 ## 1. Purpose
 
-Explain how the prototype is built, which state is real, and which sentences in the UI are not backed by code. A reader should be able to change the mock without inventing a server.
+Define the records, the states, the transitions, the invariants, the failures, and the permissions for the pilot, including the tenancy principle that is in the schema and not in the product surface.
 
 ## 2. Scope
 
-### 2.1 IMPLEMENTED
+### 2.1 In the pilot design
 
-| Piece | Where |
-| --- | --- |
-| Vite 5 + React 18 + TypeScript SPA | `package.json`, `src/main.tsx` |
-| Hash routing, five pages | `src/main.tsx`, `src/App.tsx` |
-| In-memory mock with a 180ms delay | `src/services/mockApi.ts` |
-| Seed fixture | `src/data/seed.ts` |
-| Shared React state | `src/context/AppState.tsx` |
-| Static GitHub Pages deploy of `dist/` | `.github/workflows/deploy-pages.yml` |
+`Community`, `CommunityConfig`, `Account`, `GuestPass`, `Vehicle`, `Violation`, `ViolationPhoto`, `TowAuthorization`, `AuditEvent`. Files for photos and for the signed writing, keyed by `community_id`.
 
-Declared dependency ranges are React `^18.3.1`, React DOM `^18.3.1`, and React Router DOM `^6.28.0`. Dev dependencies are the React type packages, `@vitejs/plugin-react` `^4.3.4`, TypeScript `^5.6.3`, and Vite `^5.4.10`. The Pages job installs with `npm ci` on Node 24. There is no `engines` field.
+### 2.2 Not in the pilot build
 
-### 2.2 PROPOSED
-
-Replacing `mockApi.ts` with a network client. Everything past that function list — accounts, a database, files, QR, cameras, property-management sync, notifications, tow partners — is unnamed by the code. See section 8.
+A second community's UI, payments, cameras, property-system sync, numbered-spot geometry, and any client of a tow vendor (approved scope). The mock's module store (`src/services/mockApi.ts`) is the prototype only (VERIFIED). The pilot replaces that seam. It does not extend `tow-dispatched`.
 
 ## 3. Success
 
-A technical change is faithful to this design when:
-
-1. `npm run build` still means `tsc && vite build`.
-2. The five pages still read and write through `useAppState`, not through a second store.
-3. A reload still restores `seedData`.
-4. The Pages artifact is still the Vite `dist/` directory, with `base` `/zonr/`.
+The schema can hold the pilot community and a second id without a migration of column meanings (PROPOSED, UNAPPROVED, S-6). Permission checks match `FRD.md` PAC-020 through PAC-072.
 
 ## 4. Non-goals
 
-| Non-goal | Why |
+| Non-goal | Reason |
 | --- | --- |
-| A component library, state library, or CSS framework | The app uses local components and one stylesheet |
-| Server-side rendering | `vite build` emits a static `index.html` plus hashed assets |
-| Automated tests in this tree | None exist. The minimum to add is in `TEST_PLAN.md` |
-| Choosing a database, auth provider, or API style | UNKNOWN until the questions in `PRD.md` section 8 are answered |
-| Hardening the public demo as a production system | The demo is a static mock. Threats that matter to a real parking system are not mitigated here because there is no shared data |
+| Choose a cloud vendor | UNKNOWN. Not required to freeze the records |
+| Treat RADAR's regulatory scan as a validation routine | The 2026-10-22 brief exists on Henry's Drive (VERIFIED that the file is there). Its legal summaries are not product rules. Q-016 stays UNKNOWN |
+| Store 75 stall rows | Spots are unnumbered. A count may sit on the community profile (Q-015) |
 
-## 5. Runtime shape
+## 5. Records
 
-### 5.1 Boot
+Every row has `id` and `community_id`. Ids are unique. `community_id` is required (PAC-080). Plates are uppercase with outer spaces removed (PAC-001).
 
-`index.html` mounts `/src/main.tsx` into `#root`. The title is set in that file. `main.tsx` renders, inside `React.StrictMode`, a `HashRouter`, then `AppStateProvider`, then `App`.
-
-`App` defines one layout route and five child routes. `path="*"` renders `<Navigate to="/" replace />`.
-
-| Path | Page | Loading sentence |
+| Record | Fields | Notes |
 | --- | --- | --- |
-| `/` | `OverviewPage` | Loading Zonr workspace... |
-| `/manager` | `ManagerPage` | Loading manager workspace... |
-| `/resident` | `ResidentPage` | Loading resident portal... |
-| `/guest` | `GuestPage` | Loading guest portal... |
-| `/enforcement` | `EnforcementPage` | Loading patrol tools... |
+| Community | `id`, name, region text, home count, guest-spot count | Profile only. Name and counts are data (Q-015). Not used as branch logic |
+| CommunityConfig | `community_id`, `per_stay_cap`, `per_month_cap`, `month_cap_subject`, `grace_period`, guest-rule text | One row per community. Missing row fails closed |
+| Account | `community_id`, person, permissions (`resident`, `patroller`, `admin`, `signer`) | A person may hold more than one permission (Q-014). No account is the tow company |
+| GuestPass | `community_id`, plate, issuer account, start, end, status, optional phone | Phone is present only if Q-008 says to keep it. No stall id |
+| Vehicle | `community_id`, resident account, plate, description, status, decided_by, decided_at | `decided_by` is an admin on approval, rejection, or revocation |
+| Violation | `community_id`, plate, status, warning_at, grace_ends_at, filed_by, closed_by, close_reason | First status after a successful create is `warning` |
+| ViolationPhoto | `community_id`, violation id, file key, content type | At least one for a warning (Q-007) |
+| TowAuthorization | `community_id`, violation id, plate, status, signer account, signed_at, artifact key, void_reason, voided_by | Artifact is the writing the signer uploaded. The product does not parse the statute |
+| AuditEvent | `community_id`, actor, action, entity type, entity id, at | Append only (PAC-063) |
+| GuestLink | `community_id`, pass id, token hash, expires_at | Raw token is shown once. Lookup uses the hash |
 
-`HashRouter` keeps the route after `#`. Combined with Vite `base: "/zonr/"`, the hosted manager URL is `https://theaxiomforge-sketch.github.io/zonr/#/manager`. The Pages commit `f23ae13` replaced `BrowserRouter` with `HashRouter` in the same change as the workflow. ASSUMPTION, labeled as such: the hash exists so a static host can refresh any screen without a rewrite rule. The commit message does not say that. Q-019 owns the canonical URL. The routing fact is IMPLEMENTED.
+`month_cap_subject` is an enum whose allowed values are decided by Q-002. Until then the column exists and creates are refused when it is unset (PROPOSED).
 
-### 5.2 Module store and React store
+## 6. States and transitions
 
-`mockApi.ts` holds `let db`, initialized with `structuredClone(seedData)`. Every function waits `NETWORK_DELAY_MS` (180) and returns `structuredClone` of the value it hands back. Returned objects are not the stored objects.
+### 6.1 Guest pass
 
-`AppStateProvider` loads once. The effect calls `fetchDashboard()`, ignores the result if the provider unmounted, then in a transition stores the clone and clears `isLoading`. There is no second fetch, no error state, and no abort of the timer. The load cannot fail: the mock does not reject.
+| From | To | Who or what | Guard |
+| --- | --- | --- | --- |
+| — | `active` | Resident or admin (Q-003) | Caps, one active plate, config present (PAC-003, PAC-004, PAC-006) |
+| `active` | `expired` | Server clock | `now >= end` (PAC-005, PAC-103) |
+| `active` | `revoked` | Issuer or admin (Q-003) | Actor recorded (PAC-007) |
 
-Writes go through four context methods. Each method calls the matching mock function and then applies its own update to React state:
+No transition creates a violation.
 
-| Context method | Mock function | What React state does after the mock returns |
+### 6.2 Vehicle
+
+| From | To | Who | Guard |
+| --- | --- | --- | --- |
+| — | `pending_review` | Resident or admin | Status in the body is ignored (PAC-020, PAC-101) |
+| `pending_review` | `approved` | Admin only | No other approved row for that plate (PAC-021, PAC-024) |
+| `pending_review` | `rejected` | Admin only | Row kept |
+| `approved` | `pending_review` | Resident edit | Prior approval ceases (PAC-023) |
+| `approved` | `revoked` | Admin | Row kept (PAC-025) |
+
+There is no resident edge into `approved`. That is the fix for the self-approve gap (VERIFIED in the mock; PAC-020).
+
+### 6.3 Violation
+
+| From | To | Who or what | Guard |
+| --- | --- | --- | --- |
+| — | `warning` | Patroller or admin | At least one photo stored; grace configured (PAC-040, PAC-041, PAC-042) |
+| `warning` | `grace_elapsed` | Server clock | `now >= grace_ends_at` |
+| `warning` or `grace_elapsed` | `closed` | Filer or admin | Reason required (PAC-045) |
+
+`grace_elapsed` is not a tow. It only unlocks PAC-050.
+
+### 6.4 Tow authorization
+
+| From | To | Who | Guard |
+| --- | --- | --- | --- |
+| — | `draft` | Signer | Linked violation is `grace_elapsed` and same community (PAC-050) |
+| `draft` | `signed` | Signer | Artifact stored. No outbound call (PAC-051, PAC-052) |
+| `signed` | `voided` | Signer or admin | Reason required. Artifact kept (PAC-054) |
+
+A void does not delete the warning.
+
+## 7. Invariants
+
+| Id | Invariant | Label |
 | --- | --- | --- |
-| `createGuest` | `createGuestSession` | Prepends the session. Maps every open spot in that zone to guest. Increments the "Guest sessions today" stat by parsing its value and adding 1 |
-| `savePermit` | `updatePermit` | Replaces the matching permit. If the id is missing, the mock resolves empty after the wait and the context returns without a state change. No screen sends a missing id |
-| `saveSpotAssignment` | `assignSpot` | Replaces the matching spot. A missing id resolves empty and the context returns. The manager page also refuses to call this when no spot is selected |
-| `logViolation` | `createViolation` | Prepends the violation. Sets status `violation` and note to the reason on every spot with the same `currentPlate` |
+| I-1 | Every row's `community_id` references a community | PROPOSED |
+| I-2 | A session's community filter is applied on every read and write | PROPOSED |
+| I-3 | One `active` pass per plate per community | PROPOSED (Q-004) |
+| I-4 | Pass duration is within `per_stay_cap`, and the month total for `month_cap_subject` is within `per_month_cap` | PROPOSED |
+| I-5 | One `approved` vehicle per plate per community | PROPOSED |
+| I-6 | `approved` is written only with an admin `decided_by` | PROPOSED |
+| I-7 | A warning has at least one photo and a `grace_ends_at` | PROPOSED |
+| I-8 | A `signed` authorization points at a violation that was already `grace_elapsed` at sign time | PROPOSED. Whether the statute requires this sequence is UNKNOWN (Q-016). The product rule is PROPOSED |
+| I-9 | Sign, void, and export do not perform network calls to a tow vendor | PROPOSED |
+| I-10 | Audit rows are not updated or deleted by the application | PROPOSED |
+| I-11 | No column or constant is a person's name used as a permission | PROPOSED |
+| I-12 | Guest-spot count is not a foreign key from a pass | PROPOSED |
 
-The screen reads React state. The module `db` is written too, but nothing refetches it. The copies diverge in two IMPLEMENTED ways:
+## 8. Privacy and retention
 
-1. Spot allocation on guest create. The mock uses `find` and updates the first open spot in the zone. React uses `map` and updates every open spot in the zone. The seed has at most one open spot per zone, so a fresh session does not show the split. A manager can set a second spot to `open` first. Then the screen and the module disagree until reload.
-2. The guest-session stat. Only the React state update changes it. `db.stats` stays at the seed. A refetch, if one were added, would show the new session and the old "312".
+California privacy law applicability is UNKNOWN. Do not pick a statute or a retention number here. RADAR, then Henry (Q-011).
 
-Reload re-executes the module, so `db` is seeded again and React loads that seed. Both divergences disappear. They matter the day someone refetches, or tests the mock and the UI as if they were one store.
-
-`useAppState` throws `useAppState must be used inside AppStateProvider` when the context is missing. The five pages are inside the provider.
-
-### 5.3 Data model
-
-Types live in `src/types.ts`. There is no property, user, or audit type.
-
-| Type | Fields the code stores | Notes |
+| Data | Who can read it in the pilot design | Retention |
 | --- | --- | --- |
-| `Spot` | `id`, `zone`, `status` (`open`, `resident`, `guest`, `violation`), optional unit, resident name, plate, note | Zone is a free string on the spot. Forms only offer three zone names. Assignment does not edit zone |
-| `Permit` | `id`, resident name, unit, plate, vehicle, `permitType` (`smart-decal`, `plate-based`, `temporary`), `status` (`approved`, `review`, `revoked`), `registrationOnFile` | Type is never edited. Status is edited from the resident page |
-| `GuestSession` | `id`, guest name, host unit, plate, phone, `durationHours`, `remainingMinutes`, `expiresSoon`, `zone` | New rows set remaining minutes to hours times 60 and `expiresSoon` to false. No clock updates them |
-| `Violation` | `id`, plate, reason, zone, `action` (`warning`, `citation`, `tow-watch`, `tow-dispatched`), `gpsStamp`, `photoCount` | New rows use GPS `34.0523, -118.2438` and `photoCount` 1 |
-| `Stat` | `label`, `value`, `delta` | All strings. Only one label is rewritten, and only on the React copy |
+| Plate on a pass, vehicle, violation, or authorization | Resident: own vehicles and own passes. Patroller: plate-check result and violations they need to file. Admin and signer: their community. Guest link: the one plate on that pass | UNKNOWN. PROPOSED: keep through the dispute window, then delete or irreversibly tokenize. The window is not chosen |
+| Photos | Admin, signer, and the filing patroller. Not on the guest link. Not in the plate-check payload (PAC-031) | UNKNOWN. Same gate as plates. Export includes them while they are retained (PAC-060) |
+| Phone | Only if Q-008 keeps the field. PROPOSED: issuing resident and admin. Not patroller, not guest link, not other residents | UNKNOWN |
+| Audit | Admin and signer via export. Not a public page | UNKNOWN. PROPOSED: at least as long as the records they describe |
 
-Ids for new sessions and violations are `guest-` or `violation-` plus `crypto.randomUUID()`.
+The public Pages site shows the seed, including phones, to anyone (VERIFIED, `seed.ts` and the Pages URL). That site is not the pilot store. Pilot photos and plates do not go on that site (PROPOSED).
 
-Plate handling is IMPLEMENTED as follows. Guest create and violation create call `toUpperCase()` on the input. Permit update uppercases only when `input.plate` is truthy; an empty string keeps the stored plate. Spot assignment stores the plate as typed. Violation matching compares that stored spot plate to the already-uppercased violation plate. A lowercase spot plate therefore does not match an uppercase log of the "same" plate.
+## 9. Failure behavior
 
-Permit save spreads the input onto the permit object. The resident editor always sends id, vehicle, plate, status, and registration flag. It never sends a permit type.
-
-### 5.4 Seed
-
-The fixture is the whole product dataset. Counts a reviewer can confuse:
-
-| Source | What it counts |
-| --- | --- |
-| `stats` | 1,284 permits, 312 guest sessions, 87 violations prevented, 98.4% occupancy. Display strings |
-| Arrays | 8 spots, 3 permits, 3 guest sessions, 3 violations |
-| Overview Live Ops | Array lengths, plus the literal "2 tow escalations pending" |
-| Smart Decals card | Permits with type `smart-decal`. The seed has one |
-
-Spot, permit, session, and violation rows are tabulated in `FRD.md` section 12. The fixture does not satisfy referential integrity. A guest plate need not appear on a spot. A violation zone need not equal the zone of the spot with that plate. The name on a guest spot need not equal the guest-session name. No code path repairs this.
-
-## 6. Page behavior that is easy to misread from the file names
-
-### 6.1 Resident
-
-`ResidentPage` filters with `useDeferredValue`. The filter predicate is a case-insensitive `includes` over name, vehicle, plate, and unit. Selection is a separate `useState` defaulting to `permit-1`. The editor is `PermitEditor` with `key={selectedPermit.id}`, so a new id remounts the form and drops unsaved input. The resident and unit inputs are `readOnly`. The save handler does not touch spots.
-
-### 6.2 Guest
-
-The form uses native `required` on the four text fields. Duration and zone are selects with fixed options. Submit does not await the promise before clearing the form, and it does not disable the button. Two quick submits are two sessions. Phone is stored and not shown in the list.
-
-### 6.3 Manager
-
-The "map" is a CSS grid of `<button>` elements. Click copies the spot into local form state. Save is a no-op when `selectedSpotId` is still `""`. The note written by the mock is the template `` `${status} assignment updated` ``. The permit queue and violation feed are read-only maps. Nothing on this page creates a permit or a violation.
-
-### 6.4 Enforcement
-
-The scanner is a styled box. The large plate is the form state, initial value `8GKF204`, which is also seed violation-3. Changing the input changes the box. Submit does not consult `data.permits`. Empty plate is allowed. A spot with `currentPlate` `""` would match an empty log. The seed spots use `undefined` for a missing plate, and `"" === undefined` is false, so a blank log does not mark seed spots that have no plate.
-
-## 7. Build, host, and repository layout
-
-### 7.1 Scripts and config
-
-| Script | Command | Role |
+| Condition | Result | Label |
 | --- | --- | --- |
-| `dev` | `vite` | Local dev server |
-| `build` | `tsc && vite build` | Typecheck the app project, then emit `dist/` |
-| `preview` | `vite preview` | Serve the production build locally |
+| Config row missing, or cap or grace null | Refuse the create or the warning. No default of zero | PROPOSED, PAC-100 |
+| Photo upload fails | No `warning` row | PROPOSED |
+| Resident sends `status: approved` | Ignore the field. Persist `pending_review` | PROPOSED, PAC-101 |
+| Sign before grace ends, or caller is not a signer | Refuse. No artifact is marked signed. No outbound call | PROPOSED, PAC-102 |
+| Client sends its own timestamp as "now" | Ignore it. Use the server clock | PROPOSED, PAC-103 |
+| Id from another community | Not found. Same response as a missing id | PROPOSED, PAC-071 |
+| Export fails midway | Do not publish a partial archive as complete. Audit the failure | PROPOSED |
 
-`tsconfig.json` is strict, `noEmit`, JSX `react-jsx`, and includes `src` only. `tsconfig.node.json` includes `vite.config.ts`. A type error in `src` fails the Pages build because the workflow runs `npm run build`. There is no ESLint config, Prettier config, test script, or CI job other than Pages.
+The mock cannot reject a read (VERIFIED). The pilot can. The UI needs an error state the mock does not have. That screen is in `UX_DESIGN_SPEC.md`.
 
-`.gitignore` ignores `node_modules/` and `dist/`.
+## 10. Permissions
 
-### 7.2 Files
+| Action | Resident | Patroller | Admin | Signer | Guest link | Tow company |
+| --- | --- | --- | --- | --- | --- | --- |
+| Create pass | PROPOSED yes | No | Yes | No | No | No account |
+| Revoke own pass | PROPOSED yes | No | Yes | No | No | — |
+| Submit vehicle | Yes | No | Yes | No | No | — |
+| Approve or reject vehicle | No | No | Yes | No | No | — |
+| Plate check | No | Yes | Yes | No | No | — |
+| File warning with photos | No | Yes | Yes | No | No | — |
+| Sign authorization | No | No | Only with signer permission | Yes | No | — |
+| Export community | No | No | Yes | Yes | No | — |
+| Edit config | No | No | Yes | No | No | — |
 
-| Path | Responsibility |
-| --- | --- |
-| `index.html` | Shell and title |
-| `vite.config.ts` | React plugin and `base` `/zonr/` |
-| `src/main.tsx` | Router and provider |
-| `src/App.tsx` | Route table |
-| `src/components/Layout.tsx` | Brand and nav |
-| `src/components/Shared.tsx` | `SectionHeading` and `Panel` |
-| `src/pages/*.tsx` | The five screens |
-| `src/context/AppState.tsx` | Load and the four writes |
-| `src/services/mockApi.ts` | The only data access |
-| `src/data/seed.ts` | Fixture |
-| `src/types.ts` | The dashboard types |
-| `src/styles.css` | All presentation |
-| `.github/workflows/deploy-pages.yml` | Pages pipeline |
+Signer is a permission, not a hardcoded seat (I-11). The tow company is absent, not a denied role with a login.
 
-Deploy steps, the Node 24 opt-in, and the D-053 pull-request rule are operational. They are specified in `RUNBOOK.md`, not repeated here.
+## 11. What the prototype seam implies
 
-## 8. PROPOSED backend boundary
+VERIFIED: the UI calls `fetchDashboard`, `createGuestSession`, `updatePermit`, `assignSpot`, and `createViolation` in `mockApi.ts`. The pilot does not reuse `assignSpot` (numbered spots are out). It does not reuse a violation action enum that includes `tow-dispatched`. A new client replaces that module. The five-function list is not the pilot API.
 
-IMPLEMENTED seam: the UI does not know about `db`. It knows `fetchDashboard`, `createGuestSession`, `updatePermit`, `assignSpot`, and `createViolation`.
+## 12. Questions
 
-PROPOSED, and not designed: a client module with those five calls against a real API. A backend would also have to decide, and the code does not:
-
-| Topic | What the prototype does instead |
-| --- | --- |
-| Identity and authorization | Nothing. Q-001, Q-003, Q-006 |
-| Durability | Process memory. Q-015 |
-| Guest inventory when the zone is full | Creates the session anyway. Q-008 |
-| Time | Stores a number. Never decrements it. Q-009 |
-| Plate identity | String equality after an inconsistent case rule. Q-010 |
-| Files, images, GPS | A boolean, a constant photo count, a constant coordinate. Q-007, Q-011 |
-| Property-management sync | A badge. Q-014 |
-| Overview metrics | Strings, one of which the guest flow rewrites on screen only. Q-012, Q-013 |
-
-Do not add endpoints, tables, or vendors in a follow-up until those questions have answers. The resident-page sentence about a future permits API is a comment to the reader, not a contract.
-
-## 9. Defects to keep visible
-
-These are IMPLEMENTED behaviors, not a backlog Henry has accepted.
-
-| Defect | Consequence |
-| --- | --- |
-| Two writers for one action | UI tests and module tests can disagree on guest spot updates and on the guest stat |
-| Guest stat parse | `Number.parseInt` of the stat value. A non-numeric value would become `NaN` on screen. The seed value "312" parses |
-| No in-flight lock | Double submit duplicates sessions, permit writes, assignments, or violations |
-| No load or write failure UI | The mock's reads resolve. The pages call `void` on write promises, so a future rejection would be unhandled. Nothing in today's mock rejects |
-| Seed integrity | Cross-links between spots, guests, and violations are narrative, not constraints |
-| Public static hosting | Every visitor gets the same seed and a private dirty copy. There is no shared vandalism of a server, and there is also no real operation |
-
-## 10. Open questions
-
-Technical work past section 8 waits on `PRD.md` Q-001 through Q-015, Q-018, and Q-019. No stack is recommended here.
+Q-001, Q-002, Q-004, Q-005, Q-007, Q-008, Q-010, Q-011, Q-014, Q-015, Q-016, and Q-018. Vendor choice stays UNKNOWN until a build is approved. This file does not make that choice.
