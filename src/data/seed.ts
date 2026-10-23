@@ -14,7 +14,7 @@ export const seedData: DashboardData = {
       status: "resident",
       assignedUnit: "214",
       assignedResident: "Jordan Lee",
-      currentPlate: "8HTX224",
+      currentPlate: "DEMO001",
       note: "Smart Decal active"
     },
     { id: "A2", zone: "North Court", status: "open", note: "Visitor-friendly spot" },
@@ -24,14 +24,14 @@ export const seedData: DashboardData = {
       status: "guest",
       assignedUnit: "302",
       assignedResident: "Camila Flores",
-      currentPlate: "6LPE920",
+      currentPlate: "DEMO002",
       note: "Guest pass expires in 48 min"
     },
     {
       id: "B7",
       zone: "Clubhouse",
       status: "violation",
-      currentPlate: "3VLE551",
+      currentPlate: "DEMO003",
       note: "Expired session"
     },
     {
@@ -40,7 +40,7 @@ export const seedData: DashboardData = {
       status: "resident",
       assignedUnit: "118",
       assignedResident: "Miles Carter",
-      currentPlate: "7KDU402",
+      currentPlate: "DEMO004",
       note: "Assigned compact space"
     },
     { id: "C4", zone: "East Garage", status: "open", note: "EV-ready" },
@@ -59,7 +59,7 @@ export const seedData: DashboardData = {
       status: "resident",
       assignedUnit: "441",
       assignedResident: "Avery Nguyen",
-      currentPlate: "9MVP611",
+      currentPlate: "DEMO005",
       note: "Docs pending review"
     }
   ],
@@ -68,7 +68,7 @@ export const seedData: DashboardData = {
       id: "permit-1",
       residentName: "Jordan Lee",
       unit: "214",
-      plate: "8HTX224",
+      plate: "DEMO001",
       vehicle: "Tesla Model Y",
       permitType: "smart-decal",
       status: "approved",
@@ -78,7 +78,7 @@ export const seedData: DashboardData = {
       id: "permit-2",
       residentName: "Avery Nguyen",
       unit: "441",
-      plate: "9MVP611",
+      plate: "DEMO005",
       vehicle: "Toyota Camry",
       permitType: "temporary",
       status: "review",
@@ -88,7 +88,7 @@ export const seedData: DashboardData = {
       id: "permit-3",
       residentName: "Miles Carter",
       unit: "118",
-      plate: "7KDU402",
+      plate: "DEMO004",
       vehicle: "Ford F-150",
       permitType: "plate-based",
       status: "approved",
@@ -100,7 +100,7 @@ export const seedData: DashboardData = {
       id: "guest-1",
       guestName: "Amelia R.",
       hostUnit: "302",
-      plate: "6LPE920",
+      plate: "DEMO002",
       phone: "(310) 555-0188",
       durationHours: 2,
       remainingMinutes: 48,
@@ -111,7 +111,7 @@ export const seedData: DashboardData = {
       id: "guest-2",
       guestName: "Marcus T.",
       hostUnit: "118",
-      plate: "4WRS118",
+      plate: "DEMO006",
       phone: "(424) 555-0173",
       durationHours: 1,
       remainingMinutes: 11,
@@ -133,7 +133,7 @@ export const seedData: DashboardData = {
   violations: [
     {
       id: "violation-1",
-      plate: "5BXR993",
+      plate: "DEMO007",
       reason: "No permit found",
       zone: "Clubhouse",
       action: "warning",
@@ -142,7 +142,7 @@ export const seedData: DashboardData = {
     },
     {
       id: "violation-2",
-      plate: "3VLE551",
+      plate: "DEMO003",
       reason: "Guest time expired",
       zone: "North Court",
       action: "tow-watch",
@@ -151,7 +151,7 @@ export const seedData: DashboardData = {
     },
     {
       id: "violation-3",
-      plate: "8GKF204",
+      plate: "DEMO008",
       reason: "Repeat offense",
       zone: "East Garage",
       action: "tow-dispatched",

@@ -5,7 +5,7 @@ import type { ViolationAction } from "../types";
 
 export function EnforcementPage() {
   const { data, isLoading, logViolation } = useAppState();
-  const [plate, setPlate] = useState("8GKF204");
+  const [plate, setPlate] = useState("DEMO008");
   const [reason, setReason] = useState("Unauthorized vehicle");
   const [zone, setZone] = useState("East Garage");
   const [action, setAction] = useState<ViolationAction>("warning");

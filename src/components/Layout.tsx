@@ -11,6 +11,7 @@ const navItems = [
 export function Layout() {
   return (
     <div className="app-shell">
+      <p className="demo-banner" role="note">Demo — all names, plates, phones and locations are fictional.</p>
       <header className="topbar">
         <div>
           <div className="brand">Zonr</div>
