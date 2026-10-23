@@ -58,7 +58,7 @@ PROPOSED runner: the project's test tool is not chosen (UNKNOWN). The cases do n
 | T-3 | Resident edit of an approved plate returns it to `pending_review` | PAC-023 |
 | T-4 | Second approved row for the same plate in the community is refused | PAC-024 |
 | T-5 | Pass longer than `per_stay_cap` is refused and absent afterward | PAC-003, PAC-100 |
-| T-6 | Pass that breaks the month cap is refused and absent. A pass inside both caps whose window contains now is permission to park and has no stall id. The month total uses the configured window and timezone and still counts a revoked pass that overlaps the window. Unset subject, window, or timezone refuses the create | PAC-001, PAC-002, PAC-004, PAC-100 |
+| T-6 | Pass that breaks the month cap is refused and absent. A pass inside both caps whose window contains now is permission to park and has no stall id. The month total uses the configured window and timezone and still counts a revoked pass that overlaps the window. Unset subject, window, or timezone refuses the create. An admin-issued pass counts the named resident's unit or household, not the admin's. A missing subject id on that resident refuses the create | PAC-001, PAC-002, PAC-004, PAC-100 |
 | T-7 | Missing config refuses the pass and the warning. That includes an unset upload maximum and an unset guest-lookup limit | PAC-100 |
 | T-8 | A second pass for the same plate is refused when the first is scheduled or still before its end, and not revoked | PAC-006 |
 | T-9 | A pass with `start > now` is not permission to park. At `end`, a read shows `expired` using the server clock, not a client timestamp, and no job has to write that status | PAC-005, PAC-103 |
@@ -67,7 +67,7 @@ PROPOSED runner: the project's test tool is not chosen (UNKNOWN). The cases do n
 | T-12 | Sign during grace is refused. Sign when server `now >= grace_ends_at` by a signer stores `signed` with no prior `grace_elapsed` write and performs no outbound tow call. A patroller sign is refused. The writing is not served inline | PAC-043, PAC-044, PAC-050, PAC-051, PAC-052, PAC-053, PAC-102 |
 | T-13 | Export for community A contains A's rows and photo bytes and no B row. An audit row exists for the export. A signer without admin can run it | PAC-060, PAC-061, PAC-062 |
 | T-14 | A request authenticated as A, using B's id in the body or the path, is not found. The stored community stays A's | PAC-071, PAC-080, PAC-104 |
-| T-15 | Body `community_id`, actor, `decided_by`, and `permissions` do not change the session's community or the actor stored on the row. A guest token is at least 128 bits and only its hash is stored. An unknown token and a revoked pass return the same invalid line and no plate | PAC-007, PAC-009, PAC-010, PAC-104 |
+| T-15 | On a pass or vehicle request, body `community_id`, actor, `decided_by`, and `permissions` do not change the session's community or the actor stored on the row. Invite acceptance copies community and permissions from the invite and ignores both on the body. A guest-link read has no session and no actor. The lookup limit is per client address, not per token and not one community-wide counter. An over-limit lookup of a live token returns the same invalid line as an unknown token, and shows no plate | PAC-007, PAC-009, PAC-010, PAC-073, PAC-104 |
 
 T-1 is the self-approve regression. It is in the minimum because the current UI has the opposite behavior (VERIFIED).
 

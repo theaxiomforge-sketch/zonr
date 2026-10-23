@@ -106,7 +106,7 @@ No adoption rate, revenue, or time-saved figure is a success criterion. Those wo
 
 Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNICAL_DESIGN.md`.
 
-1. Every stored row carries `community_id`. A query without that scope returns nothing. The community, the actor, and the permissions come from the server session. Those fields on the request body are ignored (PROPOSED).
+1. Every stored row carries `community_id`. A query without that scope returns nothing. On pass, vehicle, violation, authorization, export, and config requests, the community, the actor, and the permissions come from the server session, and those fields on the body are ignored. A guest-link read, invite acceptance, and the operator bootstrap have no session (PROPOSED, I-2).
 2. Guest passes are plate plus a time window. They do not name a stall. A pass is permission to park only while `start <= now < end` and it is not revoked (PROPOSED).
 3. Caps and grace are read from the community's configuration. Missing configuration fails closed: the action is refused (PROPOSED).
 4. Vehicle approval is an admin-only transition. A resident edit returns the vehicle to pending review and drops any prior approval on that plate (PROPOSED).
@@ -119,7 +119,7 @@ Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNIC
 
 VERIFIED today: the resident form includes a status control whose options are approved, review, and revoked, and save writes that status through `updatePermit`. There is no actor and no role.
 
-Pilot rule (PROPOSED): the resident client cannot send a status. The server ignores a status field on a resident request. The only transition into `approved` is an admin action stored with the session's actor id and the server time. A resident change to plate or vehicle description moves an approved row back to `pending_review`. The same ignore rule covers `community_id`, actor, `decided_by`, and permissions on any body (`FRD.md` PAC-104).
+Pilot rule (PROPOSED): the resident client cannot send a status. The server ignores a status field on a resident request. The only transition into `approved` is an admin action stored with the session's actor id and the server time. A resident change to plate or vehicle description moves an approved row back to `pending_review`. The same ignore rule covers `community_id`, actor, `decided_by`, and permissions on pass, vehicle, violation, authorization, export, and config requests (`FRD.md` PAC-104).
 
 ## 8. Multi-community principle, not a build
 
