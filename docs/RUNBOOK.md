@@ -2,7 +2,7 @@
 
 Two different systems. The GitHub Pages demo is live. The pilot is a design and is not deployed.
 
-Code baseline: `main` `99d283e` (VERIFIED). Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. Success criteria for the pilot are UNAPPROVED.
+Code baseline: `main` `99d283e` (VERIFIED). Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. S-2 is D-067. The other pilot success criteria are UNAPPROVED.
 
 ## 1. Purpose
 
@@ -136,6 +136,9 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Henry as a required operator | The design forbids a person-specific permission | PROPOSED, I-11 |
 | First admin and invites | No public self-signup. The credential method is not chosen. Bootstrap is an operator action for one community, not a named person in this runbook | UNKNOWN method, Q-019. PROPOSED shape, PAC-073 |
 | Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
+| Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
+| Notice when a vehicle is held or removed | Do not send one. Whether anyone should is not chosen | UNKNOWN, Q-024 |
+| Vehicle audit retention | Do not delete vehicle audit rows on a schedule that has not been chosen. This is separate from plate, photo, and phone retention | UNKNOWN, Q-025 |
 
 ## 9. Questions
 
@@ -146,5 +149,10 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Q-016 | RADAR, before anyone treats a PDF in the product as a complete authorization |
 | Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
 | Q-019 | How the first admin signs in, before any resident plate is collected |
+| Q-020 | What hold means before an operator treats a held plate as a violation or as permission to park |
+| Q-021 | Whether a resident may change or remove a vehicle an admin has held |
+| Q-024 | Whether to tell the resident after a hold or a removal. Until answered, send nothing |
+| Q-025 | How long vehicle audit events are kept, before any deletion job exists |
+| Q-026 | Who may take a vehicle off hold. Until answered, there is no release step |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.

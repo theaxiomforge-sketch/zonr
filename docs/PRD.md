@@ -1,6 +1,6 @@
 # Zonr product requirements — single-community pilot
 
-Rewrite of the docs on pull request #1. Code baseline: `main` at `99d283e` ("Opt Pages workflow into Node 24"). Design baseline: Henry approved resuming design on a single-community pilot (2026-10-22). Success criteria in section 4 are PROPOSED and UNAPPROVED.
+Rewrite of the docs on pull request #1. Code baseline: `main` at `99d283e` ("Opt Pages workflow into Node 24"). Design baseline: Henry approved resuming design on a single-community pilot (2026-10-22). S-2 is D-067 (Henry, 2026-10-23). The other success criteria in section 4 are PROPOSED and UNAPPROVED.
 
 `pilot-scope.md` and FOUNDRY's `assessment.md` were named as the inputs. They were not in the repository, and no Drive file with those titles was found. This PRD uses the scope the task stated. It does not add findings and attribute them to FOUNDRY. Anything those files may say beyond section 3 is UNKNOWN.
 
@@ -19,7 +19,7 @@ Legal content (what CVC §22658 requires, signage, this HOA's rules, California 
 
 ### 2.1 What the repository is today
 
-Zonr at `99d283e` is a public Vite + React + TypeScript mock: five pages, one in-memory seed, no accounts, no server (VERIFIED). The resident editor can set a permit to approved, review, or revoked (VERIFIED, `src/pages/ResidentPage.tsx`). That is the self-approve gap. The pilot design removes it: only an admin can approve a resident vehicle.
+Zonr at `99d283e` is a public Vite + React + TypeScript mock: five pages, one in-memory seed, no accounts, no server (VERIFIED). The resident editor can set a permit to approved, review, or revoked (VERIFIED, `src/pages/ResidentPage.tsx`). The pilot does not keep that status control. D-067 (Henry, 2026-10-23, VERIFIED as his statement): a resident adds, updates, and removes their own vehicle with no admin pre-approval. An admin may remove any registered vehicle or put it on hold.
 
 The mock is not the pilot. Guest sessions do not expire, spots are numbered buttons, violations can be stored as `tow-dispatched`, and nothing is exported (VERIFIED).
 
@@ -49,7 +49,7 @@ Henry's strategic intent, given as his words for 2026-10-22: after piloting at h
 | HOA board | Buyer. Buys on the committee's recommendation | Approved scope |
 | Residents | Users. Register vehicles. Issue guest passes within caps | Approved scope, plus INFERRED that residents issue passes. Who else may issue is Q-003 |
 | Volunteer patrollers | Users. Plate check and violation log | Approved scope |
-| Admins | Users. Approve vehicles, configure rules, export | Approved scope. Admin is not automatically a tow signer (PROPOSED) |
+| Admins | Users. Hold or remove a registered vehicle, configure rules, export. They do not pre-approve a resident's vehicle | Approved scope for the admin user, plus D-067 for hold and remove. Admin is not automatically a tow signer (PROPOSED) |
 | Guests | Not accounts. A link only | Approved scope |
 | Tow company | Not a user. No login, no dispatch action | Approved scope |
 | Board or committee member | Signs the written tow authorization. Not a tow dispatcher | Approved scope |
@@ -61,7 +61,7 @@ INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. 
 | Capability | Rule |
 | --- | --- |
 | Guest passes | By plate, with an expiry, a per-stay cap, and a per-month cap. Cap values are community configuration (UNKNOWN until set, Q-001, Q-002) |
-| Resident vehicles | A registry. Only an admin can move a vehicle to approved |
+| Resident vehicles | A registry the resident keeps. A resident adds, updates, and removes their own vehicle. There is no admin pre-approval. An admin may remove any registered vehicle in the community or put it on hold (D-067). What hold means for a plate check or for enforcement is Q-020 |
 | Plate check | A patroller enters a plate and sees pass, vehicle, and open warning state for that community |
 | Violations | A log with photos. First outcome is a warning. A grace period then runs. Length is configuration (UNKNOWN, Q-005) |
 | Tow authorization | A record of a written authorization the scope names as CVC §22658, signed by a board or committee member. Zonr stores the record. Zonr does not authorize or dispatch a tow |
@@ -76,12 +76,12 @@ Market sizing, statute text, signage rules, and this HOA's governing documents a
 
 ## 4. Success
 
-Every criterion in this section is PROPOSED and UNAPPROVED by Henry. None is a target the pilot has accepted.
+S-2 is D-067 (Henry, 2026-10-23, VERIFIED as his statement). Every other criterion in this section is PROPOSED and UNAPPROVED. Those rows are not targets the pilot has accepted.
 
-| Id | PROPOSED criterion | UNAPPROVED |
+| Id | Criterion | UNAPPROVED |
 | --- | --- | --- |
 | S-1 | A resident of the pilot community can issue a guest pass for a plate. The pass has an expiry. A pass that would break the stay cap or the month cap is refused and not stored | Yes |
-| S-2 | A resident cannot set their own vehicle to approved. An admin can. A non-admin call that tries to approve does not change the status | Yes |
+| S-2 | A resident can add, update, and remove their own vehicle. There is no admin approval step. The status after add is `active`. An admin can hold or remove any vehicle in the community. A resident cannot put a vehicle on hold | No (D-067) |
 | S-3 | A patroller can check a plate and file a warning with at least one photo. The grace clock starts at that warning | Yes |
 | S-4 | A tow-authorization record can be signed only by an account with the signer permission, only after a warning and the configured grace, and the sign action sends nothing to a tow company. The product does not test committee membership or a named person | Yes |
 | S-5 | An admin can export one community's passes, vehicles, violations, photos, authorizations, and audit events without exporting another community | Yes |
@@ -94,7 +94,7 @@ No adoption rate, revenue, or time-saved figure is a success criterion. Those wo
 | Non-goal | Why |
 | --- | --- |
 | Treat the GitHub Pages mock as the pilot system of record | VERIFIED: it is a public static demo with no accounts |
-| Let a resident approve a permit | This is the gap the design closes |
+| Require admin pre-approval of a resident's own vehicle | D-067. The resident adds, updates, and removes that vehicle. An admin may hold or remove it |
 | Number the 75 guest spots | Approved scope: unnumbered. Count is profile data |
 | Call, email, or otherwise dispatch a tow company | Tow company is not a user. Signing a record is not a dispatch |
 | Explain CVC §22658, signage, or HOA rules in this set | UNKNOWN. RADAR |
@@ -109,17 +109,17 @@ Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNIC
 1. Every stored row carries `community_id`. A query without that scope returns nothing. On pass, vehicle, violation, authorization, export, and config requests, the community, the actor, and the permissions come from the server session, and those fields on the body are ignored. A guest-link read, invite acceptance, and the operator bootstrap have no session (PROPOSED, I-2).
 2. Guest passes are plate plus a time window. They do not name a stall. A pass is permission to park only while `start <= now < end` and it is not revoked (PROPOSED).
 3. Caps and grace are read from the community's configuration. Missing configuration fails closed: the action is refused (PROPOSED).
-4. Vehicle approval is an admin-only transition. A resident edit returns the vehicle to pending review and drops any prior approval on that plate (PROPOSED).
+4. A resident adds, updates, and removes their own vehicle. The server sets `active` on add. An admin may hold an `active` vehicle or remove an `active` or `on_hold` vehicle in the community. There is no approval transition (D-067).
 5. Every new violation's first stored outcome is a warning with photos. There is no stay record. Grace runs from that warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED).
 6. The signed authorization stores who signed, when, the plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
 7. Guests open a link for one pass. A dead link shows one invalid line and no plate. A live link does not show other plates, phones, or photos (PROPOSED).
 8. Export is per community and includes enough to reconstruct a dispute (PROPOSED). The file format is Q-010. Deletion is not in this list.
 
-## 7. Self-approve gap
+## 7. Vehicle registry
 
 VERIFIED today: the resident form includes a status control whose options are approved, review, and revoked, and save writes that status through `updatePermit`. There is no actor and no role.
 
-Pilot rule (PROPOSED): the resident client cannot send a status. The server ignores a status field on a resident request. The only transition into `approved` is an admin action stored with the session's actor id and the server time. A resident change to plate or vehicle description moves an approved row back to `pending_review`. The same ignore rule covers `community_id`, actor, `decided_by`, and permissions on pass, vehicle, violation, authorization, export, and config requests (`FRD.md` PAC-104).
+Pilot rule (D-067): there is no admin pre-approval and no `approved` status. A resident adds, updates, and removes their own vehicle. The server ignores a status field on the body. Add stores `active`. An edit of that resident's own `active` vehicle stays `active`. Hold and remove are separate actions, not a status on the body. An admin may put a vehicle on hold or remove it. The same ignore rule covers `community_id`, actor, `decided_by`, `held_by`, `removed_by`, and permissions on pass, vehicle, violation, authorization, export, and config requests (`FRD.md` PAC-104). `community_id` stays required on the vehicle row.
 
 ## 8. Multi-community principle, not a build
 
@@ -170,13 +170,20 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | Q-010 | Export format, and which roles may run it? | UNKNOWN. PROPOSED: admin and signer; CSV plus the photo files |
 | Q-011 | How long are plates, photos, and phones kept? | UNKNOWN. California privacy applicability is UNKNOWN. Both go to RADAR before a duration is chosen |
 | Q-012 | What disclosure or formal agreement, and what price, does the board need before the pilot? | UNKNOWN. The conflict is INFERRED. The response is PROPOSED |
-| Q-013 | Which success rows in section 4, if any, does Henry accept? | All are PROPOSED and UNAPPROVED |
+| Q-013 | Which success rows in section 4, if any, does Henry accept? | S-2 is D-067. S-1 and S-3 through S-6 remain PROPOSED and UNAPPROVED |
 | Q-014 | Can one person hold admin and signer, and is that two permissions or one job? | UNKNOWN. PROPOSED: two permissions, both grantable to one account, neither implied by the other |
 | Q-015 | Confirm the HOA's name and that "about 700" and "about 75" are the profile values to load | UNKNOWN as audited facts |
 | Q-016 | What must a written CVC §22658 authorization contain, what signage must exist, and what do this HOA's rules add? | UNKNOWN. RADAR. The product stores the writing the signer uploads. It does not check the statute |
 | Q-017 | May a resident see their own violation history? | UNKNOWN. PROPOSED: a resident sees their vehicles and their own passes. They do not see other residents' plates or patroller photos |
 | Q-018 | Who owns the repository's IP, and what licence should the inventory name? | UNKNOWN. No `LICENSE` file (VERIFIED) |
 | Q-019 | How does a person prove who they are, how is the first admin for a community created, and how are residents and patrollers invited? | UNKNOWN. PROPOSED shape, not a method: no public self-signup. An operator action creates the first admin bound to one community. Further accounts exist only by an invite from an admin of that community, and the invite cannot choose a different community. Password, magic link, or SSO is not chosen |
+| Q-020 | What does `on_hold` mean for a plate check and for enforcement? | UNKNOWN. The plate check may show the status. It does not map `on_hold` to a pass, a warning, or a tow, and it does not treat `on_hold` as permission to park |
+| Q-021 | May a resident edit or remove a vehicle that is `on_hold`? | UNKNOWN. Until answered, those requests are refused and the row is unchanged, because no transition is defined |
+| Q-022 | Is there a limit on how many vehicles one resident may register? | UNKNOWN. Separate and PROPOSED: at most one vehicle that is not `removed` per plate per community (PAC-024). That is not a per-resident count |
+| Q-023 | Is there a limit on how often a resident may change a plate, or another abuse control? | UNKNOWN. Each plate or description edit is audited. No frequency rule is defined |
+| Q-024 | Does anyone notify the resident when an admin holds or removes a vehicle? | UNKNOWN. The pilot design sends no notice |
+| Q-025 | How long are vehicle audit events kept? | UNKNOWN. Distinct from Q-011, which is plates, photos, and phones. No duration is chosen |
+| Q-026 | Who may take a vehicle off hold, and does that return it to `active`? | UNKNOWN. No release transition is defined |
 
 ## 12. Document map
 

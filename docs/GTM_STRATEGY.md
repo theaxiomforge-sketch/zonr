@@ -1,6 +1,6 @@
 # Zonr go-to-market — pilot first
 
-Design baseline: `PRD.md`. This file does not size a market and does not price the pilot. Success criteria are PROPOSED and UNAPPROVED.
+Design baseline: `PRD.md`. This file does not size a market and does not price the pilot. S-2 is D-067. The other success criteria, and G-1 through G-3, are PROPOSED and UNAPPROVED.
 
 Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. Market sizing is UNKNOWN and goes to RADAR. Do not import figures from RADAR's 2026-10-22 research brief into a pitch. That brief's existence on Henry's Drive is VERIFIED. Its numbers are not repeated here.
 
@@ -63,7 +63,7 @@ Step 3 is why `community_id` and per-community export exist in the design. Build
 
 | Statement | Label |
 | --- | --- |
-| The pilot offer is guest passes by plate and time, a vehicle registry approved by an admin, a patroller plate check, a warning with photos and a grace period, a stored tow authorization, and an export | Scope of this design. The software is not built (VERIFIED: the repo is still the mock) |
+| The pilot offer is guest passes by plate and time, a vehicle registry that residents keep themselves and that an admin can hold or remove, a patroller plate check, a warning with photos and a grace period, a stored tow authorization, and an export | Scope of this design, including D-067. The software is not built (VERIFIED: the repo is still the mock) |
 | Zonr does not dispatch a tow | Approved scope |
 | The current website is a demo of an earlier mock | VERIFIED |
 
@@ -89,7 +89,7 @@ INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. 
 
 ## 10. What has to be true before step 3
 
-1. Henry accepts or replaces S-1 through S-6 in `PRD.md` section 4 (Q-013).
+1. Henry accepts or replaces S-1 and S-3 through S-6 in `PRD.md` section 4 (Q-013). S-2 is D-067.
 2. Henry accepts or replaces G-1 through G-3 in section 3 of this file. Those gates are separate from Q-013 and are also UNAPPROVED.
 3. The pilot has run S-1 through S-5, or Henry explicitly waives that (not waived).
 4. Q-012 has an answer the board has seen.
