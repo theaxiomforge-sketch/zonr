@@ -89,11 +89,12 @@ INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. 
 
 ## 10. What has to be true before step 3
 
-1. Henry accepts or replaces section 3 (Q-013).
-2. The pilot has run S-1 through S-5, or Henry explicitly waives that (not waived).
-3. Q-012 has an answer the board has seen.
-4. RADAR has been asked for sizing only if a number will be said aloud. No number is cleared today.
-5. A reference case, if used, is approved by the board (G-2).
+1. Henry accepts or replaces S-1 through S-6 in `PRD.md` section 4 (Q-013).
+2. Henry accepts or replaces G-1 through G-3 in section 3 of this file. Those gates are separate from Q-013 and are also UNAPPROVED.
+3. The pilot has run S-1 through S-5, or Henry explicitly waives that (not waived).
+4. Q-012 has an answer the board has seen.
+5. RADAR has been asked for sizing only if a number will be said aloud. No number is cleared today.
+6. A reference case, if used, is approved by the board (G-2).
 
 ## 11. Questions
 

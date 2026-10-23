@@ -106,20 +106,20 @@ No adoption rate, revenue, or time-saved figure is a success criterion. Those wo
 
 Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNICAL_DESIGN.md`.
 
-1. Every stored row carries `community_id`. A query without that scope returns nothing (PROPOSED).
-2. Guest passes are plate plus a time window. They do not name a stall (PROPOSED).
+1. Every stored row carries `community_id`. A query without that scope returns nothing. The community, the actor, and the permissions come from the server session. Those fields on the request body are ignored (PROPOSED).
+2. Guest passes are plate plus a time window. They do not name a stall. A pass is permission to park only while `start <= now < end` and it is not revoked (PROPOSED).
 3. Caps and grace are read from the community's configuration. Missing configuration fails closed: the action is refused (PROPOSED).
 4. Vehicle approval is an admin-only transition. A resident edit returns the vehicle to pending review and drops any prior approval on that plate (PROPOSED).
-5. The first violation outcome for a stay is a warning with photos. Grace runs from the warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED).
+5. Every new violation's first stored outcome is a warning with photos. There is no stay record. Grace runs from that warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED).
 6. The signed authorization stores who signed, when, the plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
-7. Guests open a link for one pass. The link does not show other plates, phones, or photos (PROPOSED).
-8. Export is per community and includes enough to reconstruct a dispute (PROPOSED). The file format is Q-010.
+7. Guests open a link for one pass. A dead link shows one invalid line and no plate. A live link does not show other plates, phones, or photos (PROPOSED).
+8. Export is per community and includes enough to reconstruct a dispute (PROPOSED). The file format is Q-010. Deletion is not in this list.
 
 ## 7. Self-approve gap
 
 VERIFIED today: the resident form includes a status control whose options are approved, review, and revoked, and save writes that status through `updatePermit`. There is no actor and no role.
 
-Pilot rule (PROPOSED): the resident client cannot send a status. The server ignores a status field on a resident request. The only transition into `approved` is an admin action stored with `actor_id` and time. A resident change to plate or vehicle description moves an approved row back to `pending_review`.
+Pilot rule (PROPOSED): the resident client cannot send a status. The server ignores a status field on a resident request. The only transition into `approved` is an admin action stored with the session's actor id and the server time. A resident change to plate or vehicle description moves an approved row back to `pending_review`. The same ignore rule covers `community_id`, actor, `decided_by`, and permissions on any body (`FRD.md` PAC-104).
 
 ## 8. Multi-community principle, not a build
 
@@ -131,7 +131,7 @@ Henry will market to other communities after this pilot (VERIFIED as his 2026-10
 | Every read and write is filtered by the caller's community | Yes | A screen to join or switch communities |
 | Caps, grace, and house rules are configuration for that id | Yes | A marketplace of rule templates |
 | No constant for 700, 75, California, or the pilot name | Yes | — |
-| Export and deletion run for one community | Yes | A bulk sale-of-company tool |
+| Export runs for one community | Yes | Deletion or tokenization. The dispute window is Q-011 and is not a pilot screen. A bulk sale-of-company tool is also not built |
 
 ## 9. Acquirability, documented only
 
@@ -159,14 +159,14 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | Id | Question | Label |
 | --- | --- | --- |
 | Q-001 | What is the per-stay cap, in what unit? | UNKNOWN |
-| Q-002 | What is the per-month cap: hours or count, and is the subject the plate, the household, or the unit? | UNKNOWN |
+| Q-002 | What is the per-month cap: hours or count? Is the subject the plate, the household, or the unit? Is the window a calendar month or a rolling period, and which timezone? Which pass statuses count? | UNKNOWN. PROPOSED until set: subject, window, and timezone are configuration, and a missing one refuses the create. PROPOSED count: a stored pass that overlaps the window counts, in any of scheduled, active, expired, or revoked. The account and the pass carry `unit` and `household_id` so those subjects can be counted. The mock's permit `unit` is a string on the prototype (VERIFIED) and is not this household id |
 | Q-003 | Who may create a guest pass, and who may revoke it before expiry? | UNKNOWN. PROPOSED: resident and admin create; the issuing resident and an admin revoke |
-| Q-004 | May one plate have two active passes in the same community? | UNKNOWN. PROPOSED: no |
+| Q-004 | May one plate have two passes in the same community that are not revoked and have not reached their end, including a pass that has not started? | UNKNOWN. PROPOSED: no. A not-yet-started pass is still not permission to park (PAC-005) |
 | Q-005 | How long is the grace period after a warning? | UNKNOWN |
 | Q-006 | After grace, is the next product step only a tow-authorization record? | UNKNOWN. PROPOSED: yes. No citation product in the pilot |
 | Q-007 | Is a warning invalid without a photo? | UNKNOWN. PROPOSED: at least one photo is required |
 | Q-008 | Does the pilot store a phone number? The mock does (VERIFIED) | UNKNOWN |
-| Q-009 | What does the guest link show, and when does the link die? | UNKNOWN. PROPOSED: that pass's plate, window, and the community's guest rules. No other people's data |
+| Q-009 | What does the guest link show, and when does the link die? | UNKNOWN. PROPOSED: the link dies at the pass end or at revoke, whichever is first. While it is live, and the pass is not revoked, the page shows that pass's plate, window, and the community's guest rules. If the pass has not started, the page does not call it permission to park. An unknown token, a revoked pass, an expired pass, and an expired link all show one line, "this link is not valid," and no plate |
 | Q-010 | Export format, and which roles may run it? | UNKNOWN. PROPOSED: admin and signer; CSV plus the photo files |
 | Q-011 | How long are plates, photos, and phones kept? | UNKNOWN. California privacy applicability is UNKNOWN. Both go to RADAR before a duration is chosen |
 | Q-012 | What disclosure or formal agreement, and what price, does the board need before the pilot? | UNKNOWN. The conflict is INFERRED. The response is PROPOSED |
@@ -176,6 +176,7 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | Q-016 | What must a written CVC §22658 authorization contain, what signage must exist, and what do this HOA's rules add? | UNKNOWN. RADAR. The product stores the writing the signer uploads. It does not check the statute |
 | Q-017 | May a resident see their own violation history? | UNKNOWN. PROPOSED: a resident sees their vehicles and their own passes. They do not see other residents' plates or patroller photos |
 | Q-018 | Who owns the repository's IP, and what licence should the inventory name? | UNKNOWN. No `LICENSE` file (VERIFIED) |
+| Q-019 | How does a person prove who they are, how is the first admin for a community created, and how are residents and patrollers invited? | UNKNOWN. PROPOSED shape, not a method: no public self-signup. An operator action creates the first admin bound to one community. Further accounts exist only by an invite from an admin of that community, and the invite cannot choose a different community. Password, magic link, or SSO is not chosen |
 
 ## 12. Document map
 

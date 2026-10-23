@@ -134,6 +134,8 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Retention | Do not delete or keep on a schedule that has not been chosen | UNKNOWN, Q-011, RADAR for California privacy applicability |
 | Legal content of an authorization | Do not improvise from memory. Ask RADAR | UNKNOWN, Q-016 |
 | Henry as a required operator | The design forbids a person-specific permission | PROPOSED, I-11 |
+| First admin and invites | No public self-signup. The credential method is not chosen. Bootstrap is an operator action for one community, not a named person in this runbook | UNKNOWN method, Q-019. PROPOSED shape, PAC-073 |
+| Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
 
 ## 9. Questions
 
@@ -143,5 +145,6 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Q-012 | Whether a contract exists before any real plate is stored |
 | Q-016 | RADAR, before anyone treats a PDF in the product as a complete authorization |
 | Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
+| Q-019 | How the first admin signs in, before any resident plate is collected |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.
