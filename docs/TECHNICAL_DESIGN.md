@@ -39,11 +39,11 @@ Every row has `id` and `community_id`. Ids are unique. `community_id` is require
 | --- | --- | --- |
 | Community | `id`, name, region text, home count, guest-spot count | Profile only. Name and counts are data (Q-015). Not used as branch logic |
 | CommunityConfig | `community_id`, `per_stay_cap`, `per_month_cap`, `month_cap_subject`, `month_window`, `timezone`, `grace_period`, `max_upload_bytes`, `guest_lookup_limit`, guest-rule text | One row per community. Missing row, or a null cap, subject, window, timezone, grace, upload maximum, or lookup limit, fails closed |
-| Account | `community_id`, person, `unit`, `household_id`, permissions (`resident`, `patroller`, `admin`, `signer`) | A person may hold more than one permission (Q-014). No account is the tow company. On the requests PAC-104 names, permissions in the body are ignored. A resident's `unit` and `household_id` are written from the invite at acceptance (PAC-073), not from the vehicle form. An admin may correct those two fields on the resident account. Credential material, if Q-019 needs any, is not a column the pass or vehicle APIs accept |
+| Account | `community_id`, person, `unit`, `household_id`, permissions (`resident`, `patroller`, `admin`, `signer`) | A person may hold more than one permission (Q-014). No account is the tow company. On the requests PAC-104 names, permissions in the body are ignored. A resident's `unit` and `household_id` are written from the invite at acceptance (PAC-073), not from a pass or vehicle body. An admin correction (PAC-075) changes the account and later passes only. Credential material, if Q-019 needs any, is not a column the pass or vehicle APIs accept |
 | Session | `account_id`, `community_id`, `expires_at` | Server-created after the method in Q-019 succeeds. It identifies the account and the community. The server reads permissions from that account. The client does not insert the session or send those fields |
 | Invite | `community_id`, permissions, `unit`, `household_id`, `expires_at`, token hash | Created by an admin session. The community is copied from that session. Permissions are the allow-list in PAC-073, not the admin's own set. `unit` and `household_id` are required when `resident` is on that list. The token is at least 128 bits, stored only as a hash, and shown once. Accepting it creates an account in that community only. The accepter cannot send community, permissions, unit, or household |
-| GuestPass | `community_id`, plate, issuer account, `for_account`, `unit`, `household_id`, start, end, status, optional phone | `for_account` is the resident the pass is for. `unit` and `household_id` are copied from that account at create time, not from an admin issuer. Phone is present only if Q-008 says to keep it. No stall id. Status stored: `scheduled`, `active`, or `revoked`. `expired` is derived |
-| Vehicle | `community_id`, resident account, `unit`, plate, description, status, decided_by, decided_at | `unit` is copied from the resident account. The submit form does not collect it. `decided_by` is the admin session on approval, rejection, or revocation. A body `decided_by` is ignored |
+| GuestPass | `community_id`, plate, issuer account, `for_account`, `unit`, `household_id`, start, end, status, optional phone | `for_account` is the resident the pass is for. Without admin, it is the session account and a body value is ignored. With admin, it must be an account in this community with the resident permission. `unit` and `household_id` are copied from that account at create time. Body copies of those two fields are ignored. Phone is present only if Q-008 says to keep it. No stall id. Status stored: `scheduled`, `active`, or `revoked`. `expired` is derived |
+| Vehicle | `community_id`, resident account, `unit`, plate, description, status, decided_by, decided_at | The resident account follows the same session rule as `for_account` (PAC-020). `unit` is copied from that account. A body `unit` or `household_id` is ignored. `decided_by` is the admin session on approval, rejection, or revocation. A body `decided_by` is ignored |
 | Violation | `community_id`, plate, status, warning_at, grace_ends_at, filed_by, closed_by, close_reason | Stored status is `warning` or `closed`. Grace elapsed is derived from `grace_ends_at`. It is not a status a job must write |
 | ViolationPhoto | `community_id`, violation id, file key, content type | Content type is the type the server detected. At least one JPEG, PNG, or WebP for a warning (PAC-041, Q-007) |
 | TowAuthorization | `community_id`, violation id, plate, status, signer account, signed_at, artifact key, content type, void_reason, voided_by, voided_at | Artifact is the writing the signer uploaded. The product does not parse the statute. Content type is server-detected |
@@ -52,7 +52,7 @@ Every row has `id` and `community_id`. Ids are unique. `community_id` is require
 
 `month_cap_subject` is an enum of plate, household, or unit (Q-002). `month_window` is an enum of calendar month or rolling period. `timezone` is an IANA name stored as data. Until those are set, the columns exist and creates are refused (PROPOSED). The pilot does not hardcode a California zone. The mock's permit `unit` and guest `hostUnit` are strings (VERIFIED, `src/types.ts`). They are not `household_id`.
 
-The month total counts stored passes whose interval overlaps the window, in any of `scheduled`, `active`, derived `expired`, or `revoked` (PROPOSED, Q-002). If the subject is household or unit and `for_account` has no such id, the create is refused. An admin issuer's own ids are not the cap subject.
+The month total counts stored passes whose interval overlaps the window, in any of `scheduled`, `active`, derived `expired`, or `revoked` (PROPOSED, Q-002). If the subject is household or unit and `for_account` has no such id, the create is refused. The cap subject is `for_account`. When the issuer is an admin, that is the named resident, not the admin, unless the admin account is itself that resident. A later edit of the account does not change ids already stored on a pass (PAC-075).
 
 ## 6. States and transitions
 
@@ -79,7 +79,7 @@ A read treats a stored `scheduled` or `active` row as permission only when `star
 | `approved` | `pending_review` | Resident edit | Prior approval ceases (PAC-023) |
 | `approved` | `revoked` | Admin | Row kept (PAC-025) |
 
-There is no resident edge into `approved`. That is the fix for the self-approve gap (VERIFIED in the mock; PAC-020).
+There is no resident edge into `approved`. That is the fix for the self-approve gap (VERIFIED in the mock; PAC-020). A session without admin cannot choose the vehicle's resident account. An admin must, and that account has the resident permission (PAC-020).
 
 ### 6.3 Violation
 
@@ -124,7 +124,7 @@ California privacy law applicability is UNKNOWN. Do not pick a statute or a rete
 
 | Data | Who can read it in the pilot design | Retention |
 | --- | --- | --- |
-| Plate on a pass, vehicle, violation, or authorization | Resident: own vehicles and own passes. Patroller: plate-check result and violations they need to file. Admin and signer: their community. Guest link: the one plate on that pass, and only while the link is live under PAC-009 | UNKNOWN. PROPOSED later, not in this build: keep through the dispute window, then delete or irreversibly tokenize. The window is not chosen |
+| Plate on a pass, vehicle, violation, or authorization | Resident: vehicles whose resident account is the session, and passes whose `for_account` is the session. Patroller: plate-check result and violations they need to file. Admin and signer: their community. Guest link: the one plate on that pass, and only while the link is live under PAC-009 | UNKNOWN. PROPOSED later, not in this build: keep through the dispute window, then delete or irreversibly tokenize. The window is not chosen |
 | Photos | Admin, signer, and the filing patroller, through the short-lived URL in PAC-041. Not on the guest link. Not in the plate-check payload (PAC-031) | UNKNOWN. Same later gate as plates. Export includes the bytes while they are retained (PAC-060) |
 | Authorization file | Admin and signer, `Content-Disposition: attachment` (PAC-051). Not on the guest link. Not in the plate-check payload | UNKNOWN. Same later gate |
 | Phone | Only if Q-008 keeps the field. PROPOSED: issuing resident and admin. Not patroller, not guest link, not other residents | UNKNOWN |
@@ -140,6 +140,9 @@ The public Pages site shows the seed, including phones, to anyone (VERIFIED, `se
 | Photo or writing type, size, or upload fails | No `warning` row, or no `signed` row. The client content type is not stored | PROPOSED, PAC-041, PAC-051 |
 | Resident sends `status: approved` | Ignore the field. Persist `pending_review` | PROPOSED, PAC-101 |
 | Body sends `community_id`, actor, `decided_by`, or `permissions` on a pass, vehicle, violation, authorization, export, or config request | Ignore them. Use the session. No session: refuse | PROPOSED, PAC-104 |
+| Pass or vehicle body sends `unit` or `household_id` | Ignore them. Copy from `for_account` or the vehicle's resident account | PROPOSED, PAC-004, PAC-020 |
+| Session without admin sends `for_account` or a vehicle resident-account id | Ignore them. Use the session account | PROPOSED, PAC-004, PAC-020 |
+| Admin names a `for_account` or vehicle resident that is missing, outside this community, or without the resident permission | Refuse. No pass or vehicle row | PROPOSED, PAC-004, PAC-020 |
 | Guest-link read or invite acceptance sends `community_id`, permissions, unit, or household | Ignore them. Guest link uses the token hash and has no actor. Invite acceptance copies community, permissions, unit, and household from the invite row | PROPOSED, I-2, PAC-073 |
 | Sign before grace ends, warning closed, or caller is not a signer | Refuse. No artifact is marked signed. No outbound call. Do not wait for a `grace_elapsed` write | PROPOSED, PAC-102 |
 | Client sends its own timestamp as "now" | Ignore it. Use the server clock | PROPOSED, PAC-103 |
@@ -156,9 +159,10 @@ This table is the source of truth. A screen that omits a control for a Yes cell 
 
 | Action | Resident | Patroller | Admin | Signer | Guest link | Tow company |
 | --- | --- | --- | --- | --- | --- | --- |
-| Create pass | PROPOSED yes | No | Yes | No | No | No account |
+| Create pass | PROPOSED yes. `for_account` is the session | No | Yes. The named account must have the resident permission | No | No | No account |
 | Revoke a pass | Only a pass they issued | No | Any pass in the community | No | No | — |
-| Submit vehicle | Yes | No | Yes | No | No | — |
+| Submit vehicle | Yes. The resident account is the session | No | Yes. The named account must have the resident permission | No | No | — |
+| Edit resident unit and household | No | No | Yes | No | No | — |
 | Approve or reject vehicle | No | No | Yes | No | No | — |
 | Revoke vehicle | No | No | Yes | No | No | — |
 | Plate check | No | Yes | Yes | No | No | — |

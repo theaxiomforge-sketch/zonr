@@ -24,7 +24,7 @@ Controls come from the permissions table in `TECHNICAL_DESIGN.md` section 10. A 
 | --- | --- | --- |
 | Vehicle and own passes | Resident | Yes |
 | Plate check, warning, close of their own warning | Patroller | Yes |
-| Queue, vehicle submit, plate check, config, export, any pass, close, void, invite | Admin | Yes |
+| Queue, vehicle submit, plate check, unit and household, config, export, any pass, close, void, invite | Admin | Yes |
 | Authorization draft, sign, void, and export | Signer | Yes, extra permission. Export does not require admin |
 | One pass | Guest | Link only |
 | Tow company | Nobody | No screen |
@@ -49,12 +49,14 @@ A person in a role can finish S-1 through S-5 without seeing another community's
 
 ## 5. Resident
 
+This section is the screen for a session that does not have the admin permission. A session with admin uses section 8 for passes and vehicles and must name the resident account. It does not also get this form, which has no account field (PAC-004, PAC-020).
+
 | Region | Content | Rule |
 | --- | --- | --- |
-| Vehicles | List of this resident's vehicles and statuses `pending_review`, `approved`, `rejected`, `revoked` | No status control. Copy explains that an admin approves (PROPOSED) |
-| Submit | Plate and description. Save | Resulting status is pending. Unit and household are not on this form. If they edit an approved row, the screen shows pending again (PAC-023) |
-| Passes | Form: plate, start, end. Optional phone only if Q-008 is yes | Submit disabled, with the reason, when the cap would fail or the configured subject id is missing on this account (PAC-003, PAC-004). A start in the future is allowed and is labeled scheduled, not permission to park (PAC-005). The cap uses this resident's unit and household |
-| Own list | Their passes, start, end, and derived status | Not other residents (PAC-031, Q-017). Revoke is on a pass this resident issued (PAC-007) |
+| Vehicles | Vehicles whose resident account is this session, and statuses `pending_review`, `approved`, `rejected`, `revoked` | No status control and no account picker. Copy explains that an admin approves (PROPOSED) |
+| Submit | Plate and description. Save | Resulting status is pending. The resident account is this session. A body account id, unit, or household is ignored (PAC-020). If they edit an approved vehicle of theirs, the screen shows pending again (PAC-023) |
+| Passes | Form: plate, start, end. Optional phone only if Q-008 is yes | No account picker. `for_account` is this session (PAC-004). Submit disabled, with the reason, when the cap would fail or the configured subject id is missing on this account (PAC-003, PAC-004). A start in the future is allowed and is labeled scheduled, not permission to park (PAC-005) |
+| Own list | Passes whose `for_account` is this session, with start, end, and derived status. That includes a pass an admin issued for them | Not other residents (PAC-031, Q-017). Revoke is shown only on a pass this resident issued (PAC-007) |
 
 The prototype's Approved / Review needed / Revoked dropdown is removed for this role (VERIFIED that it exists today).
 
@@ -89,11 +91,11 @@ Admin. These controls match the permissions table, including actions a resident 
 | Region | Content |
 | --- | --- |
 | Vehicle queue | Pending rows. Actions: Approve, Reject. No bulk approve of a whole import (not in scope) |
-| Submit vehicle | Plate, description, and the resident account in this community. No status control. The stored status is `pending_review` (PAC-020) |
+| Submit vehicle | Plate, description, and an account in this community that has the resident permission. No status control. The stored status is `pending_review`. Unit and household are not fields (PAC-020) |
 | Revoke vehicle | On an approved vehicle, with a confirm step (PROPOSED, PAC-025) |
 | Plate check | The same one-plate result as the patroller (PAC-030) |
-| Resident account | Unit and household for a resident. This is the correction writer. The resident form does not set them. A pass copies the values at create time (PAC-004, PAC-073) |
-| Passes | Plate, start, end, and the resident this pass is for. No unit or household fields. Those are copied from that resident, not from the admin. Revoke on any pass in this community (PAC-004, PAC-007) |
+| Edit resident unit and household | Unit and household on an account in this community that has the resident permission. Admin only (permissions table). The write is audited. It changes that account and later passes. It does not change ids already copied onto existing passes (PAC-075) |
+| Passes | Plate, start, end, and the resident this pass is for. That account must have the resident permission. No unit or household fields. Those are copied from that resident. Revoke on any pass in this community (PAC-004, PAC-007) |
 | Warning | The same photo warning form as the patroller, for a plate in this community (PAC-040) |
 | Violations | Close, with a reason, on a warning in this community (PAC-045) |
 | Void | On a `signed` authorization. Reason required. Does not require the signer permission (PAC-054). There is still no Sign button unless this account also has signer |

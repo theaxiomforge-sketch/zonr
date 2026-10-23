@@ -53,12 +53,12 @@ PROPOSED runner: the project's test tool is not chosen (UNKNOWN). The cases do n
 
 | Case | Asserts | Ids |
 | --- | --- | --- |
-| T-1 | Resident create ignores `status: approved` and stores `pending_review` | PAC-020, PAC-101 |
+| T-1 | Resident create ignores `status: approved` and stores `pending_review`. A body resident-account id is ignored and the vehicle's resident is the session | PAC-020, PAC-101 |
 | T-2 | Admin moves that row to `approved` and is recorded as `decided_by`. A patroller token receives a refusal and the status does not change | PAC-021, PAC-022 |
 | T-3 | Resident edit of an approved plate returns it to `pending_review` | PAC-023 |
 | T-4 | Second approved row for the same plate in the community is refused | PAC-024 |
 | T-5 | Pass longer than `per_stay_cap` is refused and absent afterward | PAC-003, PAC-100 |
-| T-6 | Pass that breaks the month cap is refused and absent. A pass inside both caps whose window contains now is permission to park and has no stall id. The month total uses the configured window and timezone and still counts a revoked pass that overlaps the window. Unset subject, window, or timezone refuses the create. An admin-issued pass counts the named resident's unit or household, not the admin's. A missing subject id on that resident refuses the create | PAC-001, PAC-002, PAC-004, PAC-100 |
+| T-6 | Pass that breaks the month cap is refused and absent. A pass inside both caps whose window contains now is permission to park and has no stall id. The month total uses the configured window and timezone and still counts a revoked pass that overlaps the window. Unset subject, window, or timezone refuses the create. A resident session that sends another account id still stores `for_account` as itself. An admin pass whose named account lacks the resident permission is refused. A later edit of unit or household does not change ids already copied onto an existing pass | PAC-001, PAC-002, PAC-004, PAC-075, PAC-100 |
 | T-7 | Missing config refuses the pass and the warning. That includes an unset upload maximum and an unset guest-lookup limit | PAC-100 |
 | T-8 | A second pass for the same plate is refused when the first is scheduled or still before its end, and not revoked | PAC-006 |
 | T-9 | A pass with `start > now` is not permission to park. At `end`, a read shows `expired` using the server clock, not a client timestamp, and no job has to write that status | PAC-005, PAC-103 |
