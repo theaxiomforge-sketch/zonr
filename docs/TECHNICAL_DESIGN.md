@@ -140,7 +140,7 @@ The public Pages site shows the seed, including phones, to anyone (VERIFIED, `se
 | Photo or writing type, size, or upload fails | No `warning` row, or no `signed` row. The client content type is not stored | PROPOSED, PAC-041, PAC-051 |
 | Resident sends `status: approved` | Ignore the field. Persist `pending_review` | PROPOSED, PAC-101 |
 | Body sends `community_id`, actor, `decided_by`, or `permissions` on a pass, vehicle, violation, authorization, export, or config request | Ignore them. Use the session. No session: refuse | PROPOSED, PAC-104 |
-| Guest-link read or invite acceptance sends `community_id` or permissions | Ignore them. Guest link uses the token hash and has no actor. Invite acceptance copies community and permissions from the invite row | PROPOSED, I-2, PAC-073 |
+| Guest-link read or invite acceptance sends `community_id`, permissions, unit, or household | Ignore them. Guest link uses the token hash and has no actor. Invite acceptance copies community, permissions, unit, and household from the invite row | PROPOSED, I-2, PAC-073 |
 | Sign before grace ends, warning closed, or caller is not a signer | Refuse. No artifact is marked signed. No outbound call. Do not wait for a `grace_elapsed` write | PROPOSED, PAC-102 |
 | Client sends its own timestamp as "now" | Ignore it. Use the server clock | PROPOSED, PAC-103 |
 | Id from another community | Not found. Same response as a missing id | PROPOSED, PAC-071 |
