@@ -53,12 +53,12 @@ PROPOSED runner: the project's test tool is not chosen (UNKNOWN). The cases do n
 
 | Case | Asserts | Ids |
 | --- | --- | --- |
-| T-1 | Resident create ignores `status: approved` and stores `pending_review`. A body resident-account id is ignored and the vehicle's resident is the session | PAC-020, PAC-101 |
+| T-1 | A resident session without admin ignores `status: approved` and stores `pending_review`. A body resident-account id is ignored and the vehicle's resident is the session. A patroller or signer session without resident is refused and stores nothing | PAC-020, PAC-101 |
 | T-2 | Admin moves that row to `approved` and is recorded as `decided_by`. A patroller token receives a refusal and the status does not change | PAC-021, PAC-022 |
-| T-3 | Resident edit of an approved plate returns it to `pending_review` | PAC-023 |
+| T-3 | An edit of plate or description on an approved vehicle returns it to `pending_review` when the vehicle's resident account is the session, including when that session also has admin. A body status of `approved` does not keep it approved. An edit of someone else's vehicle is not found. An edit of a `rejected` or `revoked` vehicle is refused | PAC-023, PAC-101 |
 | T-4 | Second approved row for the same plate in the community is refused | PAC-024 |
 | T-5 | Pass longer than `per_stay_cap` is refused and absent afterward | PAC-003, PAC-100 |
-| T-6 | Pass that breaks the month cap is refused and absent. A pass inside both caps whose window contains now is permission to park and has no stall id. The month total uses the configured window and timezone and still counts a revoked pass that overlaps the window. Unset subject, window, or timezone refuses the create. A resident session that sends another account id still stores `for_account` as itself. An admin pass whose named account lacks the resident permission is refused. A later edit of unit or household does not change ids already copied onto an existing pass | PAC-001, PAC-002, PAC-004, PAC-075, PAC-100 |
+| T-6 | Pass that breaks the month cap is refused and absent. A pass inside both caps whose window contains now is permission to park and has no stall id. The month total uses the configured window and timezone and still counts a revoked pass that overlaps the window. Unset subject, window, or timezone refuses the create. A session with resident and not admin that sends another account id still stores `for_account` as itself. A patroller session without resident is refused. An admin pass whose named account lacks the resident permission is refused. A later edit of unit or household does not change ids already copied onto an existing pass | PAC-001, PAC-002, PAC-004, PAC-075, PAC-100 |
 | T-7 | Missing config refuses the pass and the warning. That includes an unset upload maximum and an unset guest-lookup limit | PAC-100 |
 | T-8 | A second pass for the same plate is refused when the first is scheduled or still before its end, and not revoked | PAC-006 |
 | T-9 | A pass with `start > now` is not permission to park. At `end`, a read shows `expired` using the server clock, not a client timestamp, and no job has to write that status | PAC-005, PAC-103 |
@@ -73,7 +73,7 @@ T-1 is the self-approve regression. It is in the minimum because the current UI 
 
 ## 6. Prototype check, not the pilot suite
 
-Until the pilot exists, a change to the mock can still be looked at by hand: five routes load, a resident save still writes, a reload restores the seed. That walkthrough does not pass T-1 through T-14. Do not record it as pilot evidence.
+Until the pilot exists, a change to the mock can still be looked at by hand: five routes load, a resident save still writes, a reload restores the seed. That walkthrough does not pass T-1 through T-15. Do not record it as pilot evidence.
 
 `npm run build` on Node 24 matches the Pages workflow (VERIFIED). Run it for mock changes. It is not a substitute for section 5.
 

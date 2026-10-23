@@ -18,13 +18,13 @@ Open pull request #2 adds a yellow banner, text exactly "Demo — all names, pla
 
 ### 2.2 Pilot surfaces
 
-Controls come from the permissions table in `TECHNICAL_DESIGN.md` section 10. A role with a Yes in that table has the control on their screen.
+Controls come from the permissions table in `TECHNICAL_DESIGN.md` section 10. A column is a permission. A session sees each control that one of its permissions allows. Create pass and submit vehicle use the admin rule when the session has admin.
 
 | Surface | Who | Account |
 | --- | --- | --- |
-| Vehicle and own passes | Resident | Yes |
+| Vehicle and own passes | Resident permission, and not admin | Yes |
 | Plate check, warning, close of their own warning | Patroller | Yes |
-| Queue, vehicle submit, plate check, unit and household, config, export, any pass, close, void, invite | Admin | Yes |
+| Queue, vehicle submit, own-vehicle edit, plate check, unit and household, config, export, any pass, close, void, invite | Admin | Yes |
 | Authorization draft, sign, void, and export | Signer | Yes, extra permission. Export does not require admin |
 | One pass | Guest | Link only |
 | Tow company | Nobody | No screen |
@@ -49,14 +49,15 @@ A person in a role can finish S-1 through S-5 without seeing another community's
 
 ## 5. Resident
 
-This section is the screen for a session that does not have the admin permission. A session with admin uses section 8 for passes and vehicles and must name the resident account. It does not also get this form, which has no account field (PAC-004, PAC-020).
+This section is the screen for a session that has the resident permission and does not have admin, including when that session also has patroller or signer. A patroller or a signer without resident does not get it, and a create from that session is refused (PAC-004, PAC-020). A session with admin does not get this section. It uses section 8, including the own-vehicle edit when the vehicle's resident account is that session.
 
 | Region | Content | Rule |
 | --- | --- | --- |
 | Vehicles | Vehicles whose resident account is this session, and statuses `pending_review`, `approved`, `rejected`, `revoked` | No status control and no account picker. Copy explains that an admin approves (PROPOSED) |
-| Submit | Plate and description. Save | Resulting status is pending. The resident account is this session. A body account id, unit, or household is ignored (PAC-020). If they edit an approved vehicle of theirs, the screen shows pending again (PAC-023) |
+| Submit | Plate and description. Save | Resulting status is pending. The resident account is this session. A body account id, unit, or household is ignored (PAC-020) |
+| Own vehicle edit | Plate and description on a `pending_review` or `approved` vehicle whose resident account is this session | No status control. `pending_review` stays `pending_review`. `approved` returns to `pending_review` (PAC-023). `rejected` and `revoked` have no edit |
 | Passes | Form: plate, start, end. Optional phone only if Q-008 is yes | No account picker. `for_account` is this session (PAC-004). Submit disabled, with the reason, when the cap would fail or the configured subject id is missing on this account (PAC-003, PAC-004). A start in the future is allowed and is labeled scheduled, not permission to park (PAC-005) |
-| Own list | Passes whose `for_account` is this session, with start, end, and derived status. That includes a pass an admin issued for them | Not other residents (PAC-031, Q-017). Revoke is shown only on a pass this resident issued (PAC-007) |
+| Own list | Passes whose `for_account` is this session, with start, end, and derived status. That includes a pass an admin issued for them | Not other residents' passes or vehicles (PAC-007, Q-017). Revoke is shown only on a pass this resident issued (PAC-007) |
 
 The prototype's Approved / Review needed / Revoked dropdown is removed for this role (VERIFIED that it exists today).
 
@@ -77,7 +78,7 @@ The page does not show phone, photos, the host's other passes, or a map of stall
 | Region | Content | Rule |
 | --- | --- | --- |
 | Plate check | One plate field and one result | The result shows the three parts in PAC-030 together: approved vehicle or none, scheduled or current pass or none, and the open warning or none with its grace end and whether grace has ended. "No record" only when all three are empty (PAC-033). A warning past grace stays visible |
-| Hidden | Phone, photo bytes, other people's vehicles, export, config, sign | PAC-031 |
+| Hidden | Phone, photo bytes, any vehicle other than the one approved vehicle in the result, export, config, sign | PAC-031 |
 | Warning | Plate (filled from the check), reason, one or more photos, submit | Submit stays unavailable until a photo is attached (Q-007). Submit is refused, with a reason, when this plate already has an unclosed warning (PAC-046). There is no action menu of citation or tow dispatched |
 | Close | On a warning this patroller filed. Reason required | Not on someone else's warning (PAC-045) |
 | After submit | Grace end time | No button that signs an authorization |
@@ -92,6 +93,7 @@ Admin. These controls match the permissions table, including actions a resident 
 | --- | --- |
 | Vehicle queue | Pending rows. Actions: Approve, Reject. No bulk approve of a whole import (not in scope) |
 | Submit vehicle | Plate, description, and an account in this community that has the resident permission. No status control. The stored status is `pending_review`. Unit and household are not fields (PAC-020) |
+| Own vehicle edit | Plate and description on a `pending_review` or `approved` vehicle whose resident account is this session. No status control and no account picker. `pending_review` stays `pending_review`. `approved` returns to `pending_review` (PAC-023). `rejected` and `revoked` have no edit. Someone else's vehicle has no edit here |
 | Revoke vehicle | On an approved vehicle, with a confirm step (PROPOSED, PAC-025) |
 | Plate check | The same one-plate result as the patroller (PAC-030) |
 | Edit resident unit and household | Unit and household on an account in this community that has the resident permission. Admin only (permissions table). The write is audited. It changes that account and later passes. It does not change ids already copied onto existing passes (PAC-075) |
