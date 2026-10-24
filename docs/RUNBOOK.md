@@ -137,7 +137,7 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | First admin and invites | No public self-signup. The credential method is not chosen. Bootstrap is an operator action for one community, not a named person in this runbook | UNKNOWN method, Q-019. PROPOSED shape, PAC-073 |
 | Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
 | Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
-| Resident edit or remove while on hold | Refused. The vehicle stays on hold. An admin removing the hold is what frees it for those actions. There is no release step | D-069. Release itself is Q-026 |
+| Release a hold | Only an admin. Residents and patrollers cannot. The status becomes `active`. That target is derived from D-069, which frees the vehicle for resident edits. Henry can correct the target status. Record the admin, the time, and an optional reason on the audit event. Do not send a notice | D-075. The notice is Q-032 |
 | How many vehicles one resident may register | No cap. Do not refuse an add because the account already has vehicles. One current row per plate still applies | D-070. Plate rule is PAC-024 |
 | Notice when an admin holds or removes a vehicle | Send one to that vehicle's resident. Do not choose the channel or the wording. Do not send one when the resident removes their own vehicle | D-072. Channel and wording are Q-028, tied to Q-019 |
 | Plate changes | Allow 3 per vehicle in 30 days. Refuse the 4th while those three still count. Do not count a description-only edit or the original add. Do not share the count across a resident's vehicles. Admins see the changes on the vehicle audit events. Do not keep a second log. Do not add another abuse control | D-073. The 30-day count is the proposed rolling window, Q-029. Further controls are Q-030 and are not in force |
@@ -145,7 +145,7 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 
 ## 9. Questions
 
-Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 is resolved there by D-073. Q-024 is resolved there by D-072. Q-025 is resolved there by D-074. Q-020, Q-026, Q-027, Q-028, Q-029, Q-030, and Q-031 stay open. Q-011 stays open.
+Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 is resolved there by D-073. Q-024 is resolved there by D-072. Q-025 is resolved there by D-074. Q-026 is resolved there by D-075. Q-020, Q-027, Q-028, Q-029, Q-030, Q-031, and Q-032 stay open. Q-011 stays open.
 
 To verify the audit job: run it, then check one audit event aged 364 days and one aged exactly 365 days are still present, and one aged past 365 days is gone with no archive copy. Check the violation's stored plate and the tow authorization's copied plate are unchanged. Check a plate-change event aged 30 days is still present.
 
@@ -157,16 +157,17 @@ To verify the audit job: run it, then check one audit event aged 364 days and on
 | Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
 | Q-019 | How the first admin signs in, before any resident plate is collected |
 | Q-020 | What hold means before an operator treats a held plate as a violation or as permission to park |
-| Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin removing the hold frees it. That is not a release procedure |
+| Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin release is what frees it. That release is D-075, and it is not the remove action |
 | Q-022 | Resolved by D-070. Do not refuse an add because the resident already has vehicles |
 | Q-023 | Resolved by D-073. Enforce 3 plate changes per vehicle per 30 days. Admins already see them on the audit events |
 | Q-024 | Resolved by D-072. Tell the resident after an admin hold or an admin removal. Do not tell them after their own removal |
 | Q-025 | Resolved by D-074. The audit job purges events past 365 days. Verify with the checks above |
-| Q-026 | Who may take a vehicle off hold, and whether that returns it to active. D-069's likely reading is that an admin release leaves a resident-editable state. Until Q-026 is answered, there is no release step |
+| Q-026 | Resolved by D-075. Only an admin releases a hold. The status becomes active, derived from D-069. Do not let a resident or a patroller do it |
 | Q-027 | Whether a warning with an empty reason is refused, and whether that reason is a fixed list. Until answered, store the free text, including empty |
 | Q-028 | Which channel carries the hold or removal notice, and what it says. Tied to Q-019. Until answered, write the event and do not choose a channel or wording |
 | Q-029 | Whether the 30 days are a rolling 30 × 24 hours on server timestamps, which is the proposed count, or some other window. Until answered, use the proposed count. Do not switch to a calendar or a community timezone |
 | Q-030 | Whether any abuse control besides the plate-change limit is required. Until answered, do not add one |
 | Q-031 | Whether violation records and tow-authorization records follow the 365-day audit retention. Until answered, the audit job does not delete them |
+| Q-032 | Whether releasing a hold notifies the resident. Until answered, do not send one. D-072 covers hold and remove only |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.
