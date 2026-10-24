@@ -1,6 +1,6 @@
 # Zonr technical design — pilot
 
-Code baseline: `main` `99d283e` (VERIFIED). Pilot behavior: `FRD.md`. This file is the record shape. It is PROPOSED except where D-067 decides the vehicle rule. It is not a deployed service. Success criteria other than S-2 are UNAPPROVED (`PRD.md` section 4).
+Code baseline: `main` `99d283e` (VERIFIED). Pilot behavior: `FRD.md`. This file is the record shape. It is PROPOSED except where D-067 and D-069 decide the vehicle rule. It is not a deployed service. Success criteria other than S-2 are UNAPPROVED (`PRD.md` section 4).
 
 Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. Statute text is UNKNOWN and is not designed here. Route it to RADAR.
 
@@ -78,12 +78,12 @@ A read treats a stored `scheduled` or `active` row as permission only when `star
 | From | To | Who | Guard |
 | --- | --- | --- | --- |
 | — | `active` | Session with resident, including one that also has admin | Own account only. Body status, account, unit, and household are ignored. `created_by` and `created_at` are the session and the server clock. The audit event's `after` holds the plate and description (PAC-020, PAC-062, PAC-101, D-067) |
-| `active` | `active` | That vehicle's resident session, including when it also has admin | Plate or description only. Status stays `active`. `updated_by` and `updated_at` are the session and the server clock. The audit event stores `before` and `after` for plate and description. The edit does not change a violation plate or an authorization plate. No frequency rule (PAC-023, Q-023) |
+| `active` | `active` | That vehicle's resident session, including when it also has admin | Plate or description only. Status stays `active`. Refused while `on_hold` (D-069). `updated_by` and `updated_at` are the session and the server clock. The audit event stores `before` and `after` for plate and description. The edit does not change a violation plate or an authorization plate. No frequency rule (PAC-023, Q-023) |
 | `active` | `on_hold` | Admin | Any vehicle in the community. `held_by` and `held_at` are the admin session and the server clock. Holding `on_hold` or `removed` is refused (PAC-021, D-067). Enforcement meaning is Q-020 |
-| `active` | `removed` | That vehicle's resident session, or an admin | Resident: own vehicle only. Admin: any in the community. Row kept. `removed_by` and `removed_at` are the session and the server clock (PAC-025, D-067) |
+| `active` | `removed` | That vehicle's resident session, or an admin | Resident: own `active` vehicle only (D-069 refuses this while `on_hold`). Admin: any in the community. Row kept. `removed_by` and `removed_at` are the session and the server clock (PAC-025, D-067) |
 | `on_hold` | `removed` | Admin | Any in the community. Same remove fields. `held_by` and `held_at` stay (PAC-025) |
 
-D-067 (Henry, 2026-10-23, VERIFIED as his statement): a resident adds, updates, and removes their own vehicle with no admin pre-approval. An admin may remove any registered vehicle in the community or put it on hold. There is no approval status and no admin add of a vehicle for another account. A session without resident is refused on add. The mock still lets a resident save a status of approved (VERIFIED, `PRD.md` section 7). The pilot does not copy that write. `community_id` is required (I-1). Holding or removing does not define an enforcement result (Q-020). A resident edit or remove of `on_hold` is not a transition (Q-021): the request is refused and the row is unchanged. Nothing in this table takes a vehicle off hold (Q-026). Nothing restores a `removed` row.
+D-067 (Henry, 2026-10-23, VERIFIED as his statement): a resident adds, updates, and removes their own vehicle with no admin pre-approval. An admin may remove any registered vehicle in the community or put it on hold. There is no approval status and no admin add of a vehicle for another account. A session without resident is refused on add. The mock still lets a resident save a status of approved (VERIFIED, `PRD.md` section 7). The pilot does not copy that write. `community_id` is required (I-1). Holding or removing does not define an enforcement result (Q-020). D-069 (Henry, VERIFIED as his statement; `PRD.md` section 11.1): a resident cannot edit or remove a vehicle that is `on_hold`, including when that session also has admin. The request is refused and the row stays `on_hold`. Only an admin removing the hold frees that vehicle for resident edits and removal. The likely reading is that the release leaves a resident-editable state. Who may release, and whether the status returns to `active`, stays Q-026, so this table has no release edge. Admin removal of an `on_hold` vehicle still sets `removed` (PAC-025) and is a different action from removing the hold. Nothing restores a `removed` row.
 
 ### 6.3 Violation
 
@@ -113,7 +113,7 @@ A void does not delete the warning.
 | I-3 | One pass per plate per community that is not revoked and has `now < end`, whether or not it has started. Permission to park is only the in-window case | PROPOSED (Q-004, PAC-005, PAC-006) |
 | I-4 | Pass duration is within `per_stay_cap`. The month total uses `month_window` and `timezone`, for `month_cap_subject`, and counts overlapping passes in any of scheduled, active, expired, or revoked | PROPOSED (Q-002) |
 | I-5 | One vehicle that is not `removed` per plate per community | PROPOSED (PAC-024). Not a per-resident count (Q-022) |
-| I-6 | `active` is written on a resident add, with `created_by` from that session. `on_hold` is written only by an admin hold, with `held_by` from that admin session. `removed` is written by the resident remove of their own `active` vehicle or by an admin remove, with `removed_by` from that session. No status is written from the body | D-067. Column names are PROPOSED |
+| I-6 | `active` is written on a resident add, with `created_by` from that session. `on_hold` is written only by an admin hold, with `held_by` from that admin session. `removed` is written by the resident remove of their own `active` vehicle or by an admin remove, with `removed_by` from that session. A resident cannot edit or remove an `on_hold` vehicle (D-069). No status is written from the body | D-067 and D-069. Column names are PROPOSED |
 | I-7 | A warning has at least one private photo and a `grace_ends_at` | PROPOSED |
 | I-8 | A `signed` authorization points at a warning where `grace_ends_at <= signed_at`, and the warning was not closed at sign time | PROPOSED. Whether the statute requires this sequence is UNKNOWN (Q-016). The product rule is PROPOSED |
 | I-9 | Sign, void, and export do not perform network calls to a tow vendor | PROPOSED |
@@ -151,7 +151,7 @@ The public Pages site shows the seed, including phones, to anyone (VERIFIED, `se
 | Session without the resident permission calls add vehicle | Refuse. No row. Admin, patroller, and signer do not grant the add | D-067, PAC-020 |
 | Session has neither resident nor admin and calls create pass | Refuse. No row. A patroller or signer permission does not grant the create | PROPOSED, PAC-004 |
 | Admin names a `for_account` that is missing, outside this community, or without the resident permission | Refuse. No pass row | PROPOSED, PAC-004 |
-| Hold of an `on_hold` or `removed` vehicle, resident edit or remove of `on_hold`, or any edit or remove of `removed` | Refuse. The row is unchanged. Resident edit or remove of `on_hold` has no defined transition (Q-021). Nothing takes a vehicle off hold (Q-026) | D-067, PAC-021, PAC-023, PAC-025 |
+| Hold of an `on_hold` or `removed` vehicle, resident edit or remove of `on_hold`, or any edit or remove of `removed` | Refuse. The row is unchanged. A resident cannot edit or remove while `on_hold`, including a session that also has admin (D-069). Admin removal that sets `removed` is allowed on `on_hold` (PAC-025). Nothing takes a vehicle off hold (Q-026) | D-069, PAC-021, PAC-023, PAC-025 |
 | Guest-link read or invite acceptance sends `community_id`, permissions, unit, or household | Ignore them. Guest link uses the token hash and has no actor. Invite acceptance copies community, permissions, unit, and household from the invite row | PROPOSED, I-2, PAC-073 |
 | Sign before grace ends, warning closed, or caller is not a signer | Refuse. No artifact is marked signed. No outbound call. Do not wait for a `grace_elapsed` write | PROPOSED, PAC-102 |
 | Client sends its own timestamp as "now" | Ignore it. Use the server clock | PROPOSED, PAC-103 |
@@ -171,10 +171,10 @@ This table is the source of truth. A column is a permission, not an exclusive ro
 | Create pass | Yes, only when this session does not also have admin. `for_account` is the session | No | Yes. The named account must have the resident permission. This rule wins if the session also has resident | No | No | No account |
 | Revoke a pass | Only a pass they issued | No | Any pass in the community | No | No | — |
 | Add vehicle | Yes. The resident account is the session, including when this session also has admin. Status becomes `active` | No | No | No | No | — |
-| Edit own vehicle plate or description | Only an `active` vehicle whose resident account is this session, including when this session also has admin | No | No | No | No | — |
-| Remove own vehicle | Only an `active` vehicle whose resident account is this session, including when this session also has admin | No | No | No | No | — |
+| Edit own vehicle plate or description | Only an `active` vehicle whose resident account is this session, including when this session also has admin. `on_hold` is refused (D-069) | No | No | No | No | — |
+| Remove own vehicle | Only an `active` vehicle whose resident account is this session, including when this session also has admin. `on_hold` is refused (D-069) | No | No | No | No | — |
 | Hold a vehicle | No | No | Yes. Any `active` vehicle in the community | No | No | — |
-| Remove a vehicle | No | No | Yes. Any `active` or `on_hold` vehicle in the community | No | No | — |
+| Remove a vehicle | No | No | Yes. Any `active` or `on_hold` vehicle in the community. This sets `removed`. It is not removing the hold | No | No | — |
 | Edit resident unit and household | No | No | Yes | No | No | — |
 | Plate check | No | Yes | Yes | No | No | — |
 | File warning with photos | No | Yes | Yes | No | No | — |
@@ -211,10 +211,10 @@ PROPOSED. This table is the field source for the actions above. A later sentence
 | Phone | Body only if Q-008 keeps the field. Otherwise it is not stored |
 | Vehicle's resident account on add | Session, only when the session has resident, including when it also has admin. Body ignored. Without resident: refused. Admin does not name another account (PAC-020, D-067) |
 | Vehicle status on add | Server: `active`. Body ignored (PAC-020, PAC-101) |
-| Vehicle status on the own-vehicle edit | Server. Stays `active`. Body ignored. The edit exists only while status is `active`. An `on_hold` edit is refused (Q-021). A `removed` edit is refused (PAC-023) |
+| Vehicle status on the own-vehicle edit | Server. Stays `active`. Body ignored. The edit exists only while status is `active`. An `on_hold` edit is refused and the status stays `on_hold` (D-069). A `removed` edit is refused (PAC-023) |
 | Audit `before` and `after` on a vehicle create or a plate or description edit | Server. Create: `after` is the stored plate and description, and `before` is empty. Edit: `before` is the row's plate and description, and `after` is the stored plate and description. A body `before` or `after` is ignored |
 | Vehicle status on hold | Server: `on_hold`, from an admin session, and only from `active`. `held_by` is that session. `held_at` is the server clock. Body status and actor are ignored (PAC-021) |
-| Vehicle status on remove | Server: `removed`. `removed_by` is the session. `removed_at` is the server clock. Resident: own `active` only. Admin: `active` or `on_hold` in the community. `held_by` and `held_at` are not cleared (PAC-025) |
+| Vehicle status on remove | Server: `removed`. `removed_by` is the session. `removed_at` is the server clock. Resident: own `active` only. A resident remove of `on_hold` is refused (D-069). Admin: `active` or `on_hold` in the community, which sets `removed` and does not release the hold. `held_by` and `held_at` are not cleared (PAC-025) |
 | Content type of a photo or a writing | Server, from the bytes. The client type is ignored |
 | Guest-link token and invite token at creation | Server. At least 128 bits, shown once, stored only as a hash |
 | Guest-link token at lookup | Presented by the holder. The server compares the hash. `community_id` comes from the link row, not from the body |
@@ -237,4 +237,6 @@ VERIFIED: the UI calls `fetchDashboard`, `createGuestSession`, `updatePermit`, `
 
 ## 12. Questions
 
-Q-001, Q-002, Q-003, Q-004, Q-005, Q-007, Q-008, Q-009, Q-010, Q-011, Q-014, Q-015, Q-016, Q-018, Q-019, Q-020 through Q-026, and Q-027. Vendor choice and the login method stay UNKNOWN until Henry answers Q-019. This file does not choose what `on_hold` means (Q-020), whether a resident may edit or remove an `on_hold` vehicle (Q-021), a per-resident vehicle limit (Q-022), a plate-change limit (Q-023), a hold or remove notice (Q-024), an audit retention duration (Q-025), who may take a vehicle off hold (Q-026), or whether an empty warning reason is refused and whether that reason is a fixed list (Q-027).
+Decisions are in `PRD.md` section 11.1. D-069 resolves Q-021: a resident cannot edit or remove an `on_hold` vehicle, and only an admin removing the hold frees it for those actions.
+
+Q-001, Q-002, Q-003, Q-004, Q-005, Q-007, Q-008, Q-009, Q-010, Q-011, Q-014, Q-015, Q-016, Q-018, Q-019, Q-020, Q-022 through Q-026, and Q-027 stay open. Vendor choice and the login method stay UNKNOWN until Henry answers Q-019. This file does not choose what `on_hold` means (Q-020), a per-resident vehicle limit (Q-022), a plate-change limit (Q-023), a hold or remove notice (Q-024), an audit retention duration (Q-025), who may take a vehicle off hold or whether release returns it to `active` (Q-026), or whether an empty warning reason is refused and whether that reason is a fixed list (Q-027). The likely reading of D-069 is that an admin release leaves a resident-editable state. This file does not add that transition.

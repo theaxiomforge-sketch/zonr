@@ -137,10 +137,13 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | First admin and invites | No public self-signup. The credential method is not chosen. Bootstrap is an operator action for one community, not a named person in this runbook | UNKNOWN method, Q-019. PROPOSED shape, PAC-073 |
 | Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
 | Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
+| Resident edit or remove while on hold | Refused. The vehicle stays on hold. An admin removing the hold is what frees it for those actions. There is no release step | D-069. Release itself is Q-026 |
 | Notice when a vehicle is held or removed | Do not send one. Whether anyone should is not chosen | UNKNOWN, Q-024 |
 | Vehicle audit retention | Do not delete vehicle audit rows, including the previous and new plate and description, on a schedule that has not been chosen. This is separate from plate, photo, and phone retention | UNKNOWN, Q-025 |
 
 ## 9. Questions
+
+Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-026 stays open.
 
 | Id | What operations needs |
 | --- | --- |
@@ -150,10 +153,10 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
 | Q-019 | How the first admin signs in, before any resident plate is collected |
 | Q-020 | What hold means before an operator treats a held plate as a violation or as permission to park |
-| Q-021 | Whether a resident may change or remove a vehicle an admin has held |
+| Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin removing the hold frees it. That is not a release procedure |
 | Q-024 | Whether to tell the resident after a hold or a removal. Until answered, send nothing |
 | Q-025 | How long vehicle audit events are kept, before any deletion job exists |
-| Q-026 | Who may take a vehicle off hold. Until answered, there is no release step |
+| Q-026 | Who may take a vehicle off hold, and whether that returns it to active. D-069's likely reading is that an admin release leaves a resident-editable state. Until Q-026 is answered, there is no release step |
 | Q-027 | Whether a warning with an empty reason is refused, and whether that reason is a fixed list. Until answered, store the free text, including empty |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.

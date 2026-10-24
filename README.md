@@ -4,13 +4,13 @@
 
 Zonr on `main` is a Vite + React + TypeScript mock of residential parking operations. It is a public demo, not the HOA pilot.
 
-The docs on this branch are the single-community pilot design Henry approved for a design pass on 2026-10-22. They separate that design from the mock. Claims are marked VERIFIED, INFERRED, or UNKNOWN. S-2, the vehicle registry, is D-067 (Henry, 2026-10-23): residents add, update, and remove their own vehicles, and an admin may hold or remove one. The other success criteria are PROPOSED and not approved. Legal questions go to RADAR.
+The docs on this branch are the single-community pilot design Henry approved for a design pass on 2026-10-22. They separate that design from the mock. Claims are marked VERIFIED, INFERRED, or UNKNOWN. S-2, the vehicle registry, is D-067 (Henry, 2026-10-23): residents add, update, and remove their own vehicles, and an admin may hold or remove one. D-069: a resident cannot edit or remove a vehicle that is on hold. The other success criteria are PROPOSED and not approved. Legal questions go to RADAR.
 
 ## 2. Docs
 
 | Doc | What it is |
 | --- | --- |
-| [docs/PRD.md](docs/PRD.md) | Pilot scope, buyer, users, non-goals, and Henry's open questions |
+| [docs/PRD.md](docs/PRD.md) | Pilot scope, buyer, users, non-goals, decisions, and Henry's open questions |
 | [docs/FRD.md](docs/FRD.md) | Pilot acceptance ids, and the prototype behaviors that fail them |
 | [docs/TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md) | Records, states, transitions, invariants, failures, permissions |
 | [docs/UX_DESIGN_SPEC.md](docs/UX_DESIGN_SPEC.md) | Pilot screens, including resident self-service for their own vehicles (D-067) |
