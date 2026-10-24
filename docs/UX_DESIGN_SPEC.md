@@ -117,7 +117,7 @@ Signer, only if the account has that permission. Export and void are on this scr
 | Void | Reason required (PAC-054) |
 | Export | The same one-community export as admin (PAC-060) |
 
-If the same person is admin and signer, the nav shows both groups (Q-014, PROPOSED). The hold button, the remove button, and the sign button are not the same control. There is no control that deletes a community's plates or photos, and no control that deletes a `removed` vehicle row.
+If the same person is admin and signer, the nav shows both groups (Q-014, PROPOSED). The hold button, the remove button, and the sign button are not the same control. There is no control that deletes a community's plates or photos, and no control that deletes a `removed` vehicle row. There is no button that deletes an audit event. The 365-day purge is a job, not a screen (D-074).
 
 ## 9. Feedback
 

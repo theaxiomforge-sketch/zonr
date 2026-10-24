@@ -113,7 +113,7 @@ Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNIC
 5. Every new violation's first stored outcome is a warning with photos and the free-text reason from the form. The warning stores the plate submitted at filing. There is no stay record. Grace runs from that warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED). Whether an empty reason is refused is Q-027.
 6. The signed authorization stores who signed, when, the warning's plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
 7. Guests open a link for one pass. A dead link shows one invalid line and no plate. A live link does not show other plates, phones, or photos (PROPOSED).
-8. Export is per community and includes enough to reconstruct a dispute: the warning's stored plate and reason, and the vehicle audit event's previous and new plate (PROPOSED). The file format is Q-010. Deletion is not in this list.
+8. Export is per community and includes enough to reconstruct a dispute: the warning's stored plate and reason. That stored plate is the plate as filed. It remains the proof after an audit event is purged. While an audit event is still kept, the export also includes its previous and new plate (PROPOSED). Audit events are kept for 365 days and then purged (D-074). The file format is Q-010. Deletion of plates, photos, and phones is not in this list (Q-011).
 
 ## 7. Vehicle registry
 
@@ -166,10 +166,11 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | D-071 | A limit on plate changes is required, and admins can see plate changes | Henry, VERIFIED as his statement. The limit and the view are D-073. Further abuse controls are not specified and are not requirements (Q-030) |
 | D-072 | The resident is notified when an admin holds or removes their vehicle. A resident's own removal does not send that notice. The channel and the wording are not chosen | Henry, VERIFIED as his statement. Resolves Q-024. Q-028 stays open and is tied to Q-019 |
 | D-073 | The limit is 3 plate changes per vehicle per 30 days. The 4th change in that window is refused. Description-only edits do not count. Admins can see all plate changes. Those changes are the vehicle audit events that already store the previous and new plate | Henry, VERIFIED as his statement. Resolves Q-023. The way the 30 days are counted is the proposed reading in `TECHNICAL_DESIGN.md`. Q-029 stays open |
+| D-074 | Audit log retention is 365 days. An audit event is kept through day 365 and purged once it is past 365 days. The job does not archive it. Violation records and tow authorizations are not part of this decision | Henry, VERIFIED as his statement. Resolves Q-025. Q-031 stays open. Distinct from Q-011 |
 
 ### 11.2 Questions
 
-Q-021, Q-022, Q-023, and Q-024 are resolved in section 11.1. Q-020, Q-025, Q-026, Q-027, Q-028, Q-029, and Q-030 stay open.
+Q-021, Q-022, Q-023, Q-024, and Q-025 are resolved in section 11.1. Q-020, Q-026, Q-027, Q-028, Q-029, Q-030, and Q-031 stay open. Q-011 stays open. It is plates, photos, and phones, not the audit log.
 
 | Id | Question | Label |
 | --- | --- | --- |
@@ -197,18 +198,19 @@ Q-021, Q-022, Q-023, and Q-024 are resolved in section 11.1. Q-020, Q-025, Q-026
 | Q-022 | Is there a cap on how many vehicles one resident may register? | Resolved by D-070. There is no cap. Add stores another vehicle for the same account when the plate is free. One plate still has at most one vehicle that is not `removed` (PAC-024) |
 | Q-023 | How often may a resident change a plate, and can admins see those changes? | Resolved by D-073. 3 plate changes per vehicle per 30 days. The 4th in that window is refused. Description-only edits do not count, and creating a vehicle does not count. The count is per vehicle. Admins see all plate changes through the audit events that already store the previous and new plate. How the 30 days are counted is Q-029. Any control beyond this limit is Q-030 and is not a requirement. D-070 still sets no cap on how many vehicles one resident may register |
 | Q-024 | Does anyone notify the resident when an admin holds or removes a vehicle? | Resolved by D-072. Yes. An admin hold and an admin removal each write a notification event for that vehicle's resident. A resident's own removal does not. The channel and the wording are Q-028 |
-| Q-025 | How long are vehicle audit events kept? | UNKNOWN. Distinct from Q-011, which is plates, photos, and phones. No duration is chosen |
+| Q-025 | How long are vehicle audit events kept? | Resolved by D-074. 365 days. An event at 364 days is kept. An event at exactly 365 days is kept. An event past 365 days is purged, not archived. The plate on a violation does not depend on that event surviving. Distinct from Q-011 |
 | Q-026 | Who may take a vehicle off hold, and does that return it to `active`? | UNKNOWN. D-069 says an admin removing the hold frees the vehicle for resident edits and removal. The likely reading is that an admin release leaves a resident-editable state. Who may release, and whether the status returns to `active`, is not settled. No release transition is defined |
 | Q-027 | Is a warning refused when the reason is empty, and is that reason free text or a fixed list? | UNKNOWN. The warning form collects a reason, and no allowed values are defined. Until answered, the field is free text and an empty value is stored. The photo remains the only named submit gate (Q-007) |
 | Q-028 | What channel notifies the resident after an admin hold or an admin removal, and what does the notice say? | UNKNOWN. Tied to Q-019, because the channel depends on how that person is reached. No channel and no wording are chosen |
 | Q-029 | How are the 30 days in D-073 counted? | UNKNOWN which window Henry means. PROPOSED reading, used until he answers: a rolling 30 × 24 hours on the server timestamp of that vehicle's plate-change audit events. An event counts while `now - at < 30 days`. At exactly 30 days it drops out. The community timezone is not used. A calendar window is not used |
 | Q-030 | Does the pilot need an abuse control besides the plate-change limit? | UNKNOWN. Not a requirement. D-073 limits plate changes only. D-070 still lets one resident register any number of vehicles, so adding a vehicle is not limited by the plate-change rule. No such control is defined |
+| Q-031 | Do violation records, signed authorizations, and tow records follow the 365-day audit retention, or a different one? | UNKNOWN. D-074 names only the audit log. In this design the signed authorization and the tow record are the same tow-authorization row. The purge job does not delete violation rows, tow-authorization rows, their files, or notification events. Q-011 remains plates, photos, and phones |
 
 ## 12. Document map
 
 | Question | Document |
 | --- | --- |
-| Decisions D-067 and D-069 through D-073 | This file, section 11.1 |
+| Decisions D-067 and D-069 through D-074 | This file, section 11.1 |
 | Acceptance ids for the pilot | `FRD.md` |
 | Records, states, transitions, invariants, failures, permissions | `TECHNICAL_DESIGN.md` |
 | Screens for resident, guest link, patroller, admin, signer | `UX_DESIGN_SPEC.md` |
