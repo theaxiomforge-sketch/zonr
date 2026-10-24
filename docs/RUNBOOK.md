@@ -130,7 +130,7 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Data store | Not the Pages site | PROPOSED |
 | Tow dispatch | No runbook step. The product has no such action | PROPOSED, PAC-052 |
 | Secrets | None for a tow vendor | PROPOSED |
-| Export for a dispute | An admin or signer action in the future product, per community. The archive includes the warning's stored plate and reason, and the previous and new plate on a vehicle edit | PROPOSED, PAC-060. Not available today |
+| Export for a dispute | An admin or signer action in the future product, per community. The archive includes the warning's stored plate, reason code, and reason text, and the previous and new plate on a vehicle edit | PROPOSED, PAC-060. Not available today |
 | Retention | Do not delete or keep on a schedule that has not been chosen | UNKNOWN, Q-011, RADAR for California privacy applicability |
 | Legal content of an authorization | Do not improvise from memory. Ask RADAR | UNKNOWN, Q-016 |
 | Henry as a required operator | The design forbids a person-specific permission | PROPOSED, I-11 |
@@ -142,10 +142,13 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Notice when an admin holds or removes a vehicle | Send one to that vehicle's resident. Do not choose the channel or the wording. Do not send one when the resident removes their own vehicle | D-072. Channel and wording are Q-028, tied to Q-019 |
 | Plate changes | Allow 3 per vehicle in 30 days. Refuse the 4th while those three still count. Do not count a description-only edit or the original add. Do not share the count across a resident's vehicles. Admins see the changes on the vehicle audit events. Do not keep a second log. Do not add another abuse control | D-073. The 30-day count is the proposed rolling window, Q-029. Further controls are Q-030 and are not in force |
 | Audit log retention | A job deletes an audit event once its age is past 365 days. Keep an event at 364 days and an event at exactly 365 days. Do not archive the deleted event. Do not delete a violation, a tow authorization, a photo, or a notification event in that job. Do not use this job on the 30-day plate-change count. An event that still counts is younger than 30 days | D-074. Plates, photos, and phones stay Q-011. Violation and tow-authorization retention is Q-031 |
+| File a warning | Refuse an empty reason. The patroller picks one code from the proposed list in `FRD.md`. Other requires a description. Do not accept a description on any other code. The close reason stays free text and is not that list | D-076. The codes and labels are PROPOSED for Henry to confirm |
 
 ## 9. Questions
 
-Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 is resolved there by D-073. Q-024 is resolved there by D-072. Q-025 is resolved there by D-074. Q-026 is resolved there by D-075. Q-020, Q-027, Q-028, Q-029, Q-030, Q-031, and Q-032 stay open. Q-011 stays open.
+Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 is resolved there by D-073. Q-024 is resolved there by D-072. Q-025 is resolved there by D-074. Q-026 is resolved there by D-075. Q-027 is resolved there by D-076. Q-020, Q-028, Q-029, Q-030, Q-031, and Q-032 stay open. Q-011 stays open.
+
+**Q-020, for Henry.** What does "on hold" mean for a plate check and for enforcement? Does a held vehicle count as registered, or not? Can a patroller file a warning on it? Can it be towed? What does the patroller see? One option is to treat the held vehicle as registered. Another is to treat it as not registered. The current safe default, until Henry answers: the plate check shows the status `on_hold`. Hold is not permission to park, not a warning, and not a tow. The plate check does not map `on_hold` to any of those. The same paragraph is in `PRD.md` section 11.2.
 
 To verify the audit job: run it, then check one audit event aged 364 days and one aged exactly 365 days are still present, and one aged past 365 days is gone with no archive copy. Check the violation's stored plate and the tow authorization's copied plate are unchanged. Check a plate-change event aged 30 days is still present.
 
@@ -156,14 +159,14 @@ To verify the audit job: run it, then check one audit event aged 364 days and on
 | Q-016 | RADAR, before anyone treats a PDF in the product as a complete authorization |
 | Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
 | Q-019 | How the first admin signs in, before any resident plate is collected |
-| Q-020 | What hold means before an operator treats a held plate as a violation or as permission to park |
+| Q-020 | Open. See the paragraph above. Do not treat a held plate as registered, as unregistered, as a warning, or as a tow until Henry answers. The plate check shows `on_hold`. Hold is not permission to park |
 | Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin release is what frees it. That release is D-075, and it is not the remove action |
 | Q-022 | Resolved by D-070. Do not refuse an add because the resident already has vehicles |
 | Q-023 | Resolved by D-073. Enforce 3 plate changes per vehicle per 30 days. Admins already see them on the audit events |
 | Q-024 | Resolved by D-072. Tell the resident after an admin hold or an admin removal. Do not tell them after their own removal |
 | Q-025 | Resolved by D-074. The audit job purges events past 365 days. Verify with the checks above |
 | Q-026 | Resolved by D-075. Only an admin releases a hold. The status becomes active, derived from D-069. Do not let a resident or a patroller do it |
-| Q-027 | Whether a warning with an empty reason is refused, and whether that reason is a fixed list. Until answered, store the free text, including empty |
+| Q-027 | Resolved by D-076. Refuse a warning with an empty reason. Store a code from the proposed list. Other needs a description. Do not store a description on any other code. The close reason stays free text |
 | Q-028 | Which channel carries the hold or removal notice, and what it says. Tied to Q-019. Until answered, write the event and do not choose a channel or wording |
 | Q-029 | Whether the 30 days are a rolling 30 × 24 hours on server timestamps, which is the proposed count, or some other window. Until answered, use the proposed count. Do not switch to a calendar or a community timezone |
 | Q-030 | Whether any abuse control besides the plate-change limit is required. Until answered, do not add one |
