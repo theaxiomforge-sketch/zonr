@@ -61,7 +61,7 @@ INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. 
 | Capability | Rule |
 | --- | --- |
 | Guest passes | By plate, with an expiry, a per-stay cap, and a per-month cap. Cap values are community configuration (UNKNOWN until set, Q-001, Q-002) |
-| Resident vehicles | A registry the resident keeps. A resident adds, updates, and removes their own vehicle. There is no admin pre-approval. An admin may remove any registered vehicle in the community or put it on hold (D-067). A resident cannot edit or remove a vehicle that is on hold. Only an admin removing the hold frees it for those actions (D-069). What hold means for a plate check or for enforcement is Q-020 |
+| Resident vehicles | A registry the resident keeps. A resident adds, updates, and removes their own vehicle. There is no admin pre-approval. An admin may remove any registered vehicle in the community or put it on hold (D-067). A resident cannot edit or remove a vehicle that is on hold. Only an admin removing the hold frees it for those actions (D-069). A resident may register any number of vehicles (D-070). What hold means for a plate check or for enforcement is Q-020 |
 | Plate check | A patroller enters a plate and sees pass, vehicle, and open warning state for that community |
 | Violations | A log with photos. First outcome is a warning. A grace period then runs. Length is configuration (UNKNOWN, Q-005) |
 | Tow authorization | A record of a written authorization the scope names as CVC §22658, signed by a board or committee member. Zonr stores the record. Zonr does not authorize or dispatch a tow |
@@ -109,7 +109,7 @@ Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNIC
 1. Every stored row carries `community_id`. A query without that scope returns nothing. On pass, vehicle, violation, authorization, export, and config requests, the community, the actor, and the permissions come from the server session, and those fields on the body are ignored. A guest-link read, invite acceptance, and the operator bootstrap have no session (PROPOSED, I-2).
 2. Guest passes are plate plus a time window. They do not name a stall. A pass is permission to park only while `start <= now < end` and it is not revoked (PROPOSED).
 3. Caps and grace are read from the community's configuration. Missing configuration fails closed: the action is refused (PROPOSED).
-4. A resident adds, updates, and removes their own vehicle. The server sets `active` on add. An admin may hold an `active` vehicle or remove an `active` or `on_hold` vehicle in the community. There is no approval transition (D-067). A resident cannot edit or remove a vehicle that is `on_hold`, including when that session also has admin. Only an admin removing the hold frees it for resident edits and removal (D-069). A plate or description edit keeps the previous and new values on the audit event. It does not change a plate already stored on a warning.
+4. A resident adds, updates, and removes their own vehicle. The server sets `active` on add. An admin may hold an `active` vehicle or remove an `active` or `on_hold` vehicle in the community. There is no approval transition (D-067). A resident cannot edit or remove a vehicle that is `on_hold`, including when that session also has admin. Only an admin removing the hold frees it for resident edits and removal (D-069). A resident may register any number of vehicles. The schema and the add check have no count of that account's vehicles (D-070). One plate still has at most one vehicle that is not `removed` (PAC-024). A plate or description edit keeps the previous and new values on the audit event. It does not change a plate already stored on a warning.
 5. Every new violation's first stored outcome is a warning with photos and the free-text reason from the form. The warning stores the plate submitted at filing. There is no stay record. Grace runs from that warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED). Whether an empty reason is refused is Q-027.
 6. The signed authorization stores who signed, when, the warning's plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
 7. Guests open a link for one pass. A dead link shows one invalid line and no plate. A live link does not show other plates, phones, or photos (PROPOSED).
@@ -119,7 +119,7 @@ Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNIC
 
 VERIFIED today: the resident form includes a status control whose options are approved, review, and revoked, and save writes that status through `updatePermit`. There is no actor and no role.
 
-Pilot rule (D-067): there is no admin pre-approval and no `approved` status. A resident adds, updates, and removes their own vehicle. The server ignores a status field on the body. Add stores `active`. An edit of that resident's own `active` vehicle stays `active`. Hold and remove are separate actions, not a status on the body. An admin may put a vehicle on hold or remove it. D-069: a resident cannot edit or remove a vehicle while it is `on_hold`. Only an admin removing the hold frees it for those resident actions. The same ignore rule covers `community_id`, actor, `decided_by`, `held_by`, `removed_by`, and permissions on pass, vehicle, violation, authorization, export, and config requests (`FRD.md` PAC-104). `community_id` stays required on the vehicle row.
+Pilot rule (D-067): there is no admin pre-approval and no `approved` status. A resident adds, updates, and removes their own vehicle. The server ignores a status field on the body. Add stores `active`. An edit of that resident's own `active` vehicle stays `active`. Hold and remove are separate actions, not a status on the body. An admin may put a vehicle on hold or remove it. D-069: a resident cannot edit or remove a vehicle while it is `on_hold`. Only an admin removing the hold frees it for those resident actions. D-070: a resident may register any number of vehicles. Add does not count that account's vehicles. The same ignore rule covers `community_id`, actor, `decided_by`, `held_by`, `removed_by`, and permissions on pass, vehicle, violation, authorization, export, and config requests (`FRD.md` PAC-104). `community_id` stays required on the vehicle row.
 
 ## 8. Multi-community principle, not a build
 
@@ -162,10 +162,11 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | --- | --- | --- |
 | D-067 | A resident adds, updates, and removes their own vehicle. There is no admin pre-approval. An admin may hold or remove any registered vehicle in the community | Henry, 2026-10-23, VERIFIED as his statement. S-2 |
 | D-069 | A resident cannot edit or remove a vehicle that is on hold, including when that session also has admin. Only an admin removing the hold frees it for resident edits and removal. Admin removal of the vehicle, which sets `removed`, is a different action | Henry, VERIFIED as his statement. Resolves Q-021. Q-026 stays open |
+| D-070 | There is no cap on how many vehicles one resident may register. Add does not count that account's vehicles. One plate still has at most one vehicle that is not `removed` | Henry, VERIFIED as his statement. Resolves Q-022. Q-023 stays open |
 
 ### 11.2 Questions
 
-Q-021 is resolved in section 11.1. The other rows below are open.
+Q-021 and Q-022 are resolved in section 11.1. The other rows below are open.
 
 | Id | Question | Label |
 | --- | --- | --- |
@@ -190,8 +191,8 @@ Q-021 is resolved in section 11.1. The other rows below are open.
 | Q-019 | How does a person prove who they are, how is the first admin for a community created, and how are residents and patrollers invited? | UNKNOWN. PROPOSED shape, not a method: no public self-signup. An operator action creates the first admin bound to one community. Further accounts exist only by an invite from an admin of that community, and the invite cannot choose a different community. Password, magic link, or SSO is not chosen |
 | Q-020 | What does `on_hold` mean for a plate check and for enforcement? | UNKNOWN. The plate check may show the status. It does not map `on_hold` to a pass, a warning, or a tow, and it does not treat `on_hold` as permission to park |
 | Q-021 | May a resident edit or remove a vehicle that is `on_hold`? | Resolved by D-069. A resident cannot. Only an admin removing the hold frees the vehicle for resident edits and removal |
-| Q-022 | Is there a limit on how many vehicles one resident may register? | UNKNOWN. Separate and PROPOSED: at most one vehicle that is not `removed` per plate per community (PAC-024). That is not a per-resident count |
-| Q-023 | Is there a limit on how often a resident may change a plate, or another abuse control? | UNKNOWN. Each plate or description edit is audited. No frequency rule is defined |
+| Q-022 | Is there a cap on how many vehicles one resident may register? | Resolved by D-070. There is no cap. Add stores another vehicle for the same account when the plate is free. One plate still has at most one vehicle that is not `removed` (PAC-024) |
+| Q-023 | How often may a resident change a plate, and are there other abuse controls such as bulk registration? | UNKNOWN. D-070 sets no cap on how many vehicles one resident may register, so these controls stay open. Each plate or description edit is audited. No frequency rule and no bulk-registration rule are defined |
 | Q-024 | Does anyone notify the resident when an admin holds or removes a vehicle? | UNKNOWN. The pilot design sends no notice |
 | Q-025 | How long are vehicle audit events kept? | UNKNOWN. Distinct from Q-011, which is plates, photos, and phones. No duration is chosen |
 | Q-026 | Who may take a vehicle off hold, and does that return it to `active`? | UNKNOWN. D-069 says an admin removing the hold frees the vehicle for resident edits and removal. The likely reading is that an admin release leaves a resident-editable state. Who may release, and whether the status returns to `active`, is not settled. No release transition is defined |
@@ -201,7 +202,7 @@ Q-021 is resolved in section 11.1. The other rows below are open.
 
 | Question | Document |
 | --- | --- |
-| Decisions D-067 and D-069 | This file, section 11.1 |
+| Decisions D-067, D-069, and D-070 | This file, section 11.1 |
 | Acceptance ids for the pilot | `FRD.md` |
 | Records, states, transitions, invariants, failures, permissions | `TECHNICAL_DESIGN.md` |
 | Screens for resident, guest link, patroller, admin, signer | `UX_DESIGN_SPEC.md` |

@@ -138,12 +138,13 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
 | Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
 | Resident edit or remove while on hold | Refused. The vehicle stays on hold. An admin removing the hold is what frees it for those actions. There is no release step | D-069. Release itself is Q-026 |
+| How many vehicles one resident may register | No cap. Do not refuse an add because the account already has vehicles. One current row per plate still applies | D-070. Plate rule is PAC-024 |
 | Notice when a vehicle is held or removed | Do not send one. Whether anyone should is not chosen | UNKNOWN, Q-024 |
 | Vehicle audit retention | Do not delete vehicle audit rows, including the previous and new plate and description, on a schedule that has not been chosen. This is separate from plate, photo, and phone retention | UNKNOWN, Q-025 |
 
 ## 9. Questions
 
-Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-026 stays open.
+Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 and Q-026 stay open.
 
 | Id | What operations needs |
 | --- | --- |
@@ -154,6 +155,8 @@ Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-026 
 | Q-019 | How the first admin signs in, before any resident plate is collected |
 | Q-020 | What hold means before an operator treats a held plate as a violation or as permission to park |
 | Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin removing the hold frees it. That is not a release procedure |
+| Q-022 | Resolved by D-070. Do not refuse an add because the resident already has vehicles |
+| Q-023 | Plate-change frequency and bulk registration stay open. Do not add either control |
 | Q-024 | Whether to tell the resident after a hold or a removal. Until answered, send nothing |
 | Q-025 | How long vehicle audit events are kept, before any deletion job exists |
 | Q-026 | Who may take a vehicle off hold, and whether that returns it to active. D-069's likely reading is that an admin release leaves a resident-editable state. Until Q-026 is answered, there is no release step |
