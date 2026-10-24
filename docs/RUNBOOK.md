@@ -139,12 +139,13 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
 | Resident edit or remove while on hold | Refused. The vehicle stays on hold. An admin removing the hold is what frees it for those actions. There is no release step | D-069. Release itself is Q-026 |
 | How many vehicles one resident may register | No cap. Do not refuse an add because the account already has vehicles. One current row per plate still applies | D-070. Plate rule is PAC-024 |
-| Notice when a vehicle is held or removed | Do not send one. Whether anyone should is not chosen | UNKNOWN, Q-024 |
+| Notice when an admin holds or removes a vehicle | Send one to that vehicle's resident. Do not choose the channel or the wording. Do not send one when the resident removes their own vehicle | D-072. Channel and wording are Q-028, tied to Q-019 |
+| Plate-change limit and other abuse controls | A plate-change limit is required community configuration. Do not pick the number. Do not name another control until it is in that configuration. An admin can see a violation of a configured control and can act. Do not define what that action does | D-071. The number and the controls are the open part of Q-023 |
 | Vehicle audit retention | Do not delete vehicle audit rows, including the previous and new plate and description, on a schedule that has not been chosen. This is separate from plate, photo, and phone retention | UNKNOWN, Q-025 |
 
 ## 9. Questions
 
-Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 and Q-026 stay open.
+Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-024 is resolved there by D-072. Q-023 is partly resolved there by D-071. Q-026 and Q-028 stay open.
 
 | Id | What operations needs |
 | --- | --- |
@@ -156,10 +157,11 @@ Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 
 | Q-020 | What hold means before an operator treats a held plate as a violation or as permission to park |
 | Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin removing the hold frees it. That is not a release procedure |
 | Q-022 | Resolved by D-070. Do not refuse an add because the resident already has vehicles |
-| Q-023 | Plate-change frequency and bulk registration stay open. Do not add either control |
-| Q-024 | Whether to tell the resident after a hold or a removal. Until answered, send nothing |
+| Q-023 | Partly resolved by D-071. Keep a per-community plate-change limit and a place for other controls. Do not pick the number, name an extra control, or define the admin action |
+| Q-024 | Resolved by D-072. Tell the resident after an admin hold or an admin removal. Do not tell them after their own removal |
 | Q-025 | How long vehicle audit events are kept, before any deletion job exists |
 | Q-026 | Who may take a vehicle off hold, and whether that returns it to active. D-069's likely reading is that an admin release leaves a resident-editable state. Until Q-026 is answered, there is no release step |
 | Q-027 | Whether a warning with an empty reason is refused, and whether that reason is a fixed list. Until answered, store the free text, including empty |
+| Q-028 | Which channel carries the hold or removal notice, and what it says. Tied to Q-019. Until answered, write the event and do not choose a channel or wording |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.
