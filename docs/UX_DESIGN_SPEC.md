@@ -56,7 +56,7 @@ This section is the screen for a session that has the resident permission, inclu
 | --- | --- | --- |
 | Vehicles | Vehicles whose resident account is this session, and statuses `active`, `on_hold`, `removed` | No status control and no account picker. No copy that an admin must approve (D-067) |
 | Add | Plate and description. Save | Resulting status is `active`. The resident account is this session, including when this session also has admin. A body account id, unit, household, or status is ignored (PAC-020) |
-| Edit | Plate and description on an `active` vehicle whose resident account is this session | No status control. Status stays `active` (PAC-023). `on_hold` and `removed` have no edit on this screen (Q-021) |
+| Edit | Plate and description on an `active` vehicle whose resident account is this session | No status control. Status stays `active` (PAC-023). The save keeps the previous and new plate and description on the audit event. It does not change a warning already filed. `on_hold` and `removed` have no edit on this screen (Q-021) |
 | Remove | On an `active` vehicle whose resident account is this session, with a confirm step | Status becomes `removed`. The row stays in the list. `on_hold` and `removed` have no remove on this screen (Q-021, PAC-025). There is no hold control here |
 | Passes | Form: plate, start, end. Optional phone only if Q-008 is yes. This region is omitted when the session has admin | No account picker. `for_account` is this session (PAC-004). Submit disabled, with the reason, when the cap would fail or the configured subject id is missing on this account (PAC-003, PAC-004). A start in the future is allowed and is labeled scheduled, not permission to park (PAC-005) |
 | Own list | Passes whose `for_account` is this session, with start, end, and derived status. That includes a pass an admin issued for them. This region is omitted when the session has admin; section 8 lists passes | Not other residents' passes or vehicles (PAC-007, Q-017). Revoke is shown only on a pass this resident issued (PAC-007) |
@@ -81,8 +81,8 @@ The page does not show phone, photos, the host's other passes, or a map of stall
 | --- | --- | --- |
 | Plate check | One plate field and one result | The result shows the three parts in PAC-030 together: the non-removed vehicle (`active` or `on_hold`) or none, including that status, scheduled or current pass or none, and the open warning or none with its grace end and whether grace has ended. "No record" only when all three are empty (PAC-033). A warning past grace stays visible. The screen does not say that `on_hold` is permission to park, a warning, or a tow (Q-020). A `removed` vehicle is not shown as the current registration |
 | Hidden | Phone, photo bytes, any vehicle other than the one non-removed vehicle in the result, export, config, sign, hold, remove | PAC-031 |
-| Warning | Plate (filled from the check), reason, one or more photos, submit | Submit stays unavailable until a photo is attached (Q-007). Submit is refused, with a reason, when this plate already has an unclosed warning (PAC-046). There is no action menu of citation or tow dispatched |
-| Close | On a warning this patroller filed. Reason required | Not on someone else's warning (PAC-045) |
+| Warning | Plate (filled from the check), reason, one or more photos, submit | The reason is a free-text field with no fixed list. It is stored on the violation as `warning_reason`. An empty reason does not block submit (Q-027). Submit stays unavailable until a photo is attached (Q-007). Submit is refused, with the refusal text, when this plate already has an unclosed warning (PAC-046). The plate stored is the plate submitted. There is no action menu of citation or tow dispatched |
+| Close | On a warning this patroller filed. Close reason required | Not on someone else's warning. The close reason is a different field from the warning reason (PAC-045) |
 | After submit | Grace end time | No button that signs an authorization |
 
 The prototype scanner that displays a typed plate and the sentence "Permit status checked against Zonr records" does not perform a lookup (VERIFIED). The pilot result list replaces that sentence. Do not keep the sentence if the lookup can fail. Show the failure (section 9).
@@ -100,7 +100,7 @@ Admin. These controls match the admin column of the permissions table. Own-vehic
 | Edit resident unit and household | Unit and household on an account in this community that has the resident permission. Admin only (permissions table). The write is audited. It changes that account and later passes. It does not change ids already copied onto existing passes (PAC-075) |
 | Passes | Plate, start, end, and the resident this pass is for. That account must have the resident permission. No unit or household fields. Those are copied from that resident. Revoke on any pass in this community (PAC-004, PAC-007) |
 | Warning | The same photo warning form as the patroller, for a plate in this community (PAC-040) |
-| Violations | Close, with a reason, on a warning in this community (PAC-045) |
+| Violations | Close, with a close reason, on a warning in this community. That reason is separate from the warning reason (PAC-045) |
 | Void | On a `signed` authorization. Reason required. Does not require the signer permission (PAC-054). There is still no Sign button unless this account also has signer |
 | Config | Stay cap, month cap, month-cap subject, month window, timezone, grace, upload maximum, guest-lookup limit, guest-rule text. Save refuses an empty cap, empty grace, empty subject, empty window, empty timezone, empty upload maximum, or empty lookup limit (PAC-100). The timezone is not prefilled with a California zone |
 | Export | One button for this community. Shows success or failure. Does not download another community (PAC-060) |
@@ -112,7 +112,7 @@ Signer, only if the account has that permission. Export and void are on this scr
 | --- | --- |
 | Eligible warnings | Warnings where server `now >= grace_ends_at`, the warning is not closed, and there is no `signed` authorization. The screen does not wait for a stored `grace_elapsed` status |
 | Draft | Upload the writing. The screen does not claim the upload satisfies CVC §22658 (Q-016) |
-| Sign | Confirm. Result is `signed`. No "call tow" and no vendor name field that sends data |
+| Sign | Confirm. Result is `signed`. The plate stored is the warning's plate at sign time. No "call tow" and no vendor name field that sends data |
 | Void | Reason required (PAC-054) |
 | Export | The same one-community export as admin (PAC-060) |
 
@@ -141,4 +141,4 @@ PROPOSED minimum: labeled fields, errors in text not only color, photo control i
 
 ## 11. Questions
 
-Q-003, Q-007, Q-008, Q-009, Q-010, Q-014, and Q-017 decide copy and which controls exist. Q-016 forbids a screen that says the upload is legally sufficient. Q-019 is why this spec has no login screen. Q-002 is why timezone and month window are required config fields with no default. Q-020 is why hold does not describe an enforcement result. Q-021 is why `on_hold` has no resident edit or remove. Q-022 and Q-023 are why this spec has no vehicle-count cap and no plate-change limit. Q-024 is why hold and remove send no notice. Q-026 is why there is no release-hold control.
+Q-003, Q-007, Q-008, Q-009, Q-010, Q-014, and Q-017 decide copy and which controls exist. Q-016 forbids a screen that says the upload is legally sufficient. Q-019 is why this spec has no login screen. Q-002 is why timezone and month window are required config fields with no default. Q-020 is why hold does not describe an enforcement result. Q-021 is why `on_hold` has no resident edit or remove. Q-022 and Q-023 are why this spec has no vehicle-count cap and no plate-change limit. Q-024 is why hold and remove send no notice. Q-026 is why there is no release-hold control. Q-027 is why the warning reason is free text and an empty reason does not block submit.

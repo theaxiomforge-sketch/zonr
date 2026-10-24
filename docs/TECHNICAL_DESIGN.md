@@ -44,15 +44,19 @@ Every row has `id` and `community_id`. Ids are unique. `community_id` is require
 | Invite | `community_id`, permissions, `unit`, `household_id`, `expires_at`, token hash | Created by an admin session. The community is copied from that session. Permissions are the allow-list in PAC-073, not the admin's own set. `unit` and `household_id` are required when `resident` is on that list. The token is at least 128 bits, stored only as a hash, and shown once. Accepting it creates an account in that community only. The accepter cannot send community, permissions, unit, or household |
 | GuestPass | `community_id`, plate, issuer account, `for_account`, `unit`, `household_id`, start, end, status, optional phone | `for_account` is the resident the pass is for. Resident and not admin: the session account, and a body value is ignored. Admin, including an admin who also has resident: the named account, which must have the resident permission in this community. Neither resident nor admin: the create is refused. `unit` and `household_id` are copied from `for_account`. Body copies of those two fields are ignored. Phone is present only if Q-008 says to keep it. No stall id. Status stored: `scheduled`, `active`, or `revoked`. `expired` is derived |
 | Vehicle | `community_id`, resident account, `unit`, plate, description, status (`active`, `on_hold`, `removed`), `created_by`, `created_at`, `updated_by`, `updated_at`, `held_by`, `held_at`, `removed_by`, `removed_at` | The resident account is the session, and only a session with resident may add, including when that session also has admin (PAC-020, D-067). Admin does not name another account. `unit` is copied from that account. A body `unit` or `household_id` is ignored. Actor and time columns are the session and the server clock for that transition. A body `decided_by`, `held_by`, or `removed_by` is ignored (PAC-104). There is no `decided_by` column. `held_by` and `held_at` stay after a later remove. Status names and these audit columns are PROPOSED names for the transitions D-067 requires |
-| Violation | `community_id`, plate, status, warning_at, grace_ends_at, filed_by, closed_by, close_reason | Stored status is `warning` or `closed`. Grace elapsed is derived from `grace_ends_at`. It is not a status a job must write |
+| Violation | `community_id`, plate, `warning_reason`, status, warning_at, grace_ends_at, filed_by, closed_by, close_reason | Stored status is `warning` or `closed`. Grace elapsed is derived from `grace_ends_at`. It is not a status a job must write. `warning_reason` is free text from the body. No allowed-value list is defined (Q-027). The warning form collects it, and the only named submit gate is a photo, so an empty reason is stored (UX section 7, Q-007). `close_reason` is a different field and is required to close (PAC-045). `plate` is the submitted plate, uppercased, with outer spaces removed. It is the plate as recorded at filing. The row has no vehicle id. A later vehicle edit does not change this plate |
 | ViolationPhoto | `community_id`, violation id, file key, content type | Content type is the type the server detected. At least one JPEG, PNG, or WebP for a warning (PAC-041, Q-007) |
-| TowAuthorization | `community_id`, violation id, plate, status, signer account, signed_at, artifact key, content type, void_reason, voided_by, voided_at | Artifact is the writing the signer uploaded. The product does not parse the statute. Content type is server-detected |
-| AuditEvent | `community_id`, actor, action, entity type, entity id, at | Actor is the session account when a session exists. Bootstrap has no person-named actor (PAC-062). Append only (PAC-063) |
+| TowAuthorization | `community_id`, violation id, plate, status, signer account, signed_at, artifact key, content type, void_reason, voided_by, voided_at | Artifact is the writing the signer uploaded. The product does not parse the statute. Content type is server-detected. `plate` is copied from the violation's stored plate at sign time and is not read from the vehicle's current plate. A later vehicle edit does not change it |
+| AuditEvent | `community_id`, actor, action, entity type, entity id, `at`, `before`, `after` | Actor is the session account when a session exists. Bootstrap has no person-named actor (PAC-062). `at` is the server timestamp. `before` and `after` are the values that action changed. A body `before` or `after` is ignored. Append only (PAC-063). Entity type and entity id name the row. On a vehicle create, `before` is empty and `after` holds the plate and description. On a resident plate or description edit, both `before` and `after` hold the plate and description, including a field the edit left unchanged (PAC-023) |
 | GuestLink | `community_id`, pass id, token hash, expires_at | `expires_at` equals the pass end (PAC-009). Raw token is shown once and is at least 128 bits. Lookup uses the hash (PAC-010) |
 
 `month_cap_subject` is an enum of plate, household, or unit (Q-002). `month_window` is an enum of calendar month or rolling period. `timezone` is an IANA name stored as data. Until those are set, the columns exist and creates are refused (PROPOSED). The pilot does not hardcode a California zone. The mock's permit `unit` and guest `hostUnit` are strings (VERIFIED, `src/types.ts`). They are not `household_id`.
 
 The month total counts stored passes whose interval overlaps the window, in any of `scheduled`, `active`, derived `expired`, or `revoked` (PROPOSED, Q-002). If the subject is household or unit and `for_account` has no such id, the create is refused. The cap subject is `for_account`. When the issuer is an admin, that is the named resident, not the admin, unless the admin account is itself that resident. A later edit of the account does not change ids already stored on a pass (PAC-075).
+
+The plate recorded on a vehicle at time t is the `after` plate on the latest audit event for that vehicle whose action is vehicle create or a plate or description edit, and whose `at` is less than or equal to t. When two such events share `at`, the later appended event is the one that counts. Hold and remove events record status in `before` and `after`. They are not plate events. The vehicle row keeps the current plate and description. The audit event keeps the previous and new values, so the export can show the plate in effect at `warning_at` after the row has been edited (PAC-023, PAC-060).
+
+A violation links to that recorded plate by the `plate` stored on the violation at filing. It does not point at the vehicle row. The warned plate belonged to a vehicle at warning time when that vehicle's plate in effect at `warning_at` equals the violation's plate. A warning for a plate that no vehicle carried at that time still keeps the submitted plate. Signing copies that same violation plate onto the authorization (PAC-051).
 
 ## 6. States and transitions
 
@@ -73,8 +77,8 @@ A read treats a stored `scheduled` or `active` row as permission only when `star
 
 | From | To | Who | Guard |
 | --- | --- | --- | --- |
-| — | `active` | Session with resident, including one that also has admin | Own account only. Body status, account, unit, and household are ignored. `created_by` and `created_at` are the session and the server clock (PAC-020, PAC-101, D-067) |
-| `active` | `active` | That vehicle's resident session, including when it also has admin | Plate or description only. Status stays `active`. `updated_by` and `updated_at` are the session and the server clock. No frequency rule (PAC-023, Q-023) |
+| — | `active` | Session with resident, including one that also has admin | Own account only. Body status, account, unit, and household are ignored. `created_by` and `created_at` are the session and the server clock. The audit event's `after` holds the plate and description (PAC-020, PAC-062, PAC-101, D-067) |
+| `active` | `active` | That vehicle's resident session, including when it also has admin | Plate or description only. Status stays `active`. `updated_by` and `updated_at` are the session and the server clock. The audit event stores `before` and `after` for plate and description. The edit does not change a violation plate or an authorization plate. No frequency rule (PAC-023, Q-023) |
 | `active` | `on_hold` | Admin | Any vehicle in the community. `held_by` and `held_at` are the admin session and the server clock. Holding `on_hold` or `removed` is refused (PAC-021, D-067). Enforcement meaning is Q-020 |
 | `active` | `removed` | That vehicle's resident session, or an admin | Resident: own vehicle only. Admin: any in the community. Row kept. `removed_by` and `removed_at` are the session and the server clock (PAC-025, D-067) |
 | `on_hold` | `removed` | Admin | Any in the community. Same remove fields. `held_by` and `held_at` stay (PAC-025) |
@@ -85,7 +89,7 @@ D-067 (Henry, 2026-10-23, VERIFIED as his statement): a resident adds, updates, 
 
 | From | To | Who or what | Guard |
 | --- | --- | --- | --- |
-| — | `warning` | Patroller or admin | No other unclosed warning for that plate. Photo rules met. Grace configured (PAC-040, PAC-041, PAC-042, PAC-046) |
+| — | `warning` | Patroller or admin | No other unclosed warning for that plate. Photo rules met. Grace configured. `warning_reason` is the free-text body value, and empty is stored (PAC-040, PAC-041, PAC-042, PAC-046, Q-027) |
 | `warning` | `closed` | Filer or admin | Reason required (PAC-045) |
 
 Grace has ended when the stored status is `warning` and `now >= grace_ends_at`. That is a read-time comparison. It is not a stored `grace_elapsed` state and not a job. It unlocks PAC-050. It does not hide the warning on plate check (PAC-030, PAC-044).
@@ -113,10 +117,11 @@ A void does not delete the warning.
 | I-7 | A warning has at least one private photo and a `grace_ends_at` | PROPOSED |
 | I-8 | A `signed` authorization points at a warning where `grace_ends_at <= signed_at`, and the warning was not closed at sign time | PROPOSED. Whether the statute requires this sequence is UNKNOWN (Q-016). The product rule is PROPOSED |
 | I-9 | Sign, void, and export do not perform network calls to a tow vendor | PROPOSED |
-| I-10 | Audit rows are not updated or deleted by the application | PROPOSED |
+| I-10 | Audit rows are not updated or deleted by the application. `before` and `after` stay as written | PROPOSED |
 | I-11 | No column or constant names a person, including Henry, or encodes a committee-member-specific exception. Signer is a permission | PROPOSED |
 | I-12 | Guest-spot count is not a foreign key from a pass | PROPOSED |
 | I-13 | Photo and authorization bytes are private objects. The storage key is not a public URL. A read checks the privacy table, then uses a short-lived URL and the server's content type | PROPOSED |
+| I-14 | A violation's plate, and the plate copied onto a tow authorization at sign time, stay as written. A vehicle edit records the previous and new plate and description on its audit event and does not rewrite those plates | PROPOSED (PAC-023, PAC-040, PAC-051) |
 
 ## 8. Privacy and retention
 
@@ -124,7 +129,7 @@ California privacy law applicability is UNKNOWN. Do not pick a statute or a rete
 
 | Data | Who can read it in the pilot design | Retention |
 | --- | --- | --- |
-| Plate on a pass, vehicle, violation, or authorization | Resident: vehicles whose resident account is the session, and passes whose `for_account` is the session. Patroller: the plate-check payload, including the open warning on that plate, and warnings that patroller filed. Admin and signer: their community. Guest link: the one plate on that pass, and only while the link is live under PAC-009 | UNKNOWN. PROPOSED later, not in this build: keep through the dispute window, then delete or irreversibly tokenize. The window is not chosen |
+| Plate on a pass, vehicle, violation, or authorization | Resident: vehicles whose resident account is the session, and passes whose `for_account` is the session. Patroller: the plate-check payload, including the open warning on that plate, and warnings that patroller filed. Admin and signer: their community. Guest link: the one plate on that pass, and only while the link is live under PAC-009. `warning_reason` is part of the violation: admin and signer read it in the export, and the filing patroller reads it on a warning they filed. The plate-check payload does not add it (PAC-030) | UNKNOWN. PROPOSED later, not in this build: keep through the dispute window, then delete or irreversibly tokenize. The window is not chosen |
 | Photos | Admin, signer, and the filing patroller, through the short-lived URL in PAC-041. Not on the guest link. Not in the plate-check payload (PAC-031) | UNKNOWN. Same later gate as plates. Export includes the bytes while they are retained (PAC-060) |
 | Authorization file | Admin and signer, `Content-Disposition: attachment` (PAC-051). Not on the guest link. Not in the plate-check payload | UNKNOWN. Same later gate |
 | Phone | Only if Q-008 keeps the field. PROPOSED: issuing resident and admin. Not patroller, not guest link, not other residents | UNKNOWN |
@@ -139,7 +144,7 @@ The public Pages site shows the seed, including phones, to anyone (VERIFIED, `se
 | Config row missing, or cap, grace, month subject, month window, timezone, upload maximum, or guest-lookup limit null | Refuse the create, the warning, or the guest lookup. No default of zero and no California timezone default | PROPOSED, PAC-100 |
 | Photo or writing type, size, or upload fails | No `warning` row, or no `signed` row. The client content type is not stored | PROPOSED, PAC-041, PAC-051 |
 | A vehicle request sends `status` of `approved`, `on_hold`, `removed`, or `active` | Ignore the field. Add persists `active`. An edit of an `active` vehicle stays `active`. Hold and remove are not this field | D-067, PAC-101 |
-| Body sends `community_id`, actor, `decided_by`, `held_by`, `removed_by`, or `permissions` on a pass, vehicle, violation, authorization, export, or config request | Ignore them. Use the session. No session: refuse. A vehicle has no `decided_by` column | PROPOSED, PAC-104 |
+| Body sends `community_id`, actor, `decided_by`, `held_by`, `removed_by`, `before`, `after`, or `permissions` on a pass, vehicle, violation, authorization, export, or config request | Ignore them. Use the session. The server writes `before` and `after` on the audit event. No session: refuse. A vehicle has no `decided_by` column | PROPOSED, PAC-104 |
 | Pass or vehicle body sends `unit` or `household_id` | Ignore them. Copy from `for_account` or the vehicle's resident account | PROPOSED, PAC-004, PAC-020 |
 | Session has resident and not admin, and the body sends `for_account` | Ignore it. Use the session account | PROPOSED, PAC-004 |
 | Session has resident, including a session that also has admin, and the body sends a vehicle resident-account id | Ignore it. Use the session account | D-067, PAC-020 |
@@ -200,12 +205,14 @@ PROPOSED. This table is the field source for the actions above. A later sentence
 | `unit` and `household_id` on a pass or vehicle | Copied from `for_account` or the vehicle's resident account at create time. Body ignored. A later account edit does not rewrite them (PAC-075) |
 | `unit` and `household_id` on invite create | Body. Required when `resident` is in the allow-list |
 | `unit` and `household_id` on the unit-edit action | Body, admin session only (PAC-075) |
-| Plate, start, end, vehicle description, warning reason, photo bytes, close reason, void reason | Body. Plate is stored uppercased with outer spaces removed. `filed_by` is the session |
+| Plate, start, end, vehicle description, photo bytes, close reason, void reason | Body. Plate is stored uppercased with outer spaces removed. `filed_by` is the session |
+| `warning_reason` | Body, free text, stored on the violation. Empty is stored. No allowed-value list (Q-027). `close_reason` is the separate body field used only on close |
 | Cap, grace, month subject, month window, timezone, upload maximum, guest-lookup limit, guest-rule text | Body on the admin config save. `community_id` is the session. An empty value is refused (PAC-100) |
 | Phone | Body only if Q-008 keeps the field. Otherwise it is not stored |
 | Vehicle's resident account on add | Session, only when the session has resident, including when it also has admin. Body ignored. Without resident: refused. Admin does not name another account (PAC-020, D-067) |
 | Vehicle status on add | Server: `active`. Body ignored (PAC-020, PAC-101) |
 | Vehicle status on the own-vehicle edit | Server. Stays `active`. Body ignored. The edit exists only while status is `active`. An `on_hold` edit is refused (Q-021). A `removed` edit is refused (PAC-023) |
+| Audit `before` and `after` on a vehicle create or a plate or description edit | Server. Create: `after` is the stored plate and description, and `before` is empty. Edit: `before` is the row's plate and description, and `after` is the stored plate and description. A body `before` or `after` is ignored |
 | Vehicle status on hold | Server: `on_hold`, from an admin session, and only from `active`. `held_by` is that session. `held_at` is the server clock. Body status and actor are ignored (PAC-021) |
 | Vehicle status on remove | Server: `removed`. `removed_by` is the session. `removed_at` is the server clock. Resident: own `active` only. Admin: `active` or `on_hold` in the community. `held_by` and `held_at` are not cleared (PAC-025) |
 | Content type of a photo or a writing | Server, from the bytes. The client type is ignored |
@@ -230,4 +237,4 @@ VERIFIED: the UI calls `fetchDashboard`, `createGuestSession`, `updatePermit`, `
 
 ## 12. Questions
 
-Q-001, Q-002, Q-003, Q-004, Q-005, Q-007, Q-008, Q-009, Q-010, Q-011, Q-014, Q-015, Q-016, Q-018, Q-019, and Q-020 through Q-026. Vendor choice and the login method stay UNKNOWN until Henry answers Q-019. This file does not choose what `on_hold` means (Q-020), whether a resident may edit or remove an `on_hold` vehicle (Q-021), a per-resident vehicle limit (Q-022), a plate-change limit (Q-023), a hold or remove notice (Q-024), an audit retention duration (Q-025), or who may take a vehicle off hold (Q-026).
+Q-001, Q-002, Q-003, Q-004, Q-005, Q-007, Q-008, Q-009, Q-010, Q-011, Q-014, Q-015, Q-016, Q-018, Q-019, Q-020 through Q-026, and Q-027. Vendor choice and the login method stay UNKNOWN until Henry answers Q-019. This file does not choose what `on_hold` means (Q-020), whether a resident may edit or remove an `on_hold` vehicle (Q-021), a per-resident vehicle limit (Q-022), a plate-change limit (Q-023), a hold or remove notice (Q-024), an audit retention duration (Q-025), who may take a vehicle off hold (Q-026), or whether an empty warning reason is refused and whether that reason is a fixed list (Q-027).

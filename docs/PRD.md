@@ -109,11 +109,11 @@ Detail and acceptance ids are in `FRD.md`. States and invariants are in `TECHNIC
 1. Every stored row carries `community_id`. A query without that scope returns nothing. On pass, vehicle, violation, authorization, export, and config requests, the community, the actor, and the permissions come from the server session, and those fields on the body are ignored. A guest-link read, invite acceptance, and the operator bootstrap have no session (PROPOSED, I-2).
 2. Guest passes are plate plus a time window. They do not name a stall. A pass is permission to park only while `start <= now < end` and it is not revoked (PROPOSED).
 3. Caps and grace are read from the community's configuration. Missing configuration fails closed: the action is refused (PROPOSED).
-4. A resident adds, updates, and removes their own vehicle. The server sets `active` on add. An admin may hold an `active` vehicle or remove an `active` or `on_hold` vehicle in the community. There is no approval transition (D-067).
-5. Every new violation's first stored outcome is a warning with photos. There is no stay record. Grace runs from that warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED).
-6. The signed authorization stores who signed, when, the plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
+4. A resident adds, updates, and removes their own vehicle. The server sets `active` on add. An admin may hold an `active` vehicle or remove an `active` or `on_hold` vehicle in the community. There is no approval transition (D-067). A plate or description edit keeps the previous and new values on the audit event. It does not change a plate already stored on a warning.
+5. Every new violation's first stored outcome is a warning with photos and the free-text reason from the form. The warning stores the plate submitted at filing. There is no stay record. Grace runs from that warning. A tow-authorization signature is a later record, not a violation status called "dispatched" (PROPOSED). Whether an empty reason is refused is Q-027.
+6. The signed authorization stores who signed, when, the warning's plate, the linked warning, and the written artifact. It has no dispatch side effect (PROPOSED).
 7. Guests open a link for one pass. A dead link shows one invalid line and no plate. A live link does not show other plates, phones, or photos (PROPOSED).
-8. Export is per community and includes enough to reconstruct a dispute (PROPOSED). The file format is Q-010. Deletion is not in this list.
+8. Export is per community and includes enough to reconstruct a dispute: the warning's stored plate and reason, and the vehicle audit event's previous and new plate (PROPOSED). The file format is Q-010. Deletion is not in this list.
 
 ## 7. Vehicle registry
 
@@ -184,6 +184,7 @@ Legal and market questions are listed here and routed to RADAR. Henry still has 
 | Q-024 | Does anyone notify the resident when an admin holds or removes a vehicle? | UNKNOWN. The pilot design sends no notice |
 | Q-025 | How long are vehicle audit events kept? | UNKNOWN. Distinct from Q-011, which is plates, photos, and phones. No duration is chosen |
 | Q-026 | Who may take a vehicle off hold, and does that return it to `active`? | UNKNOWN. No release transition is defined |
+| Q-027 | Is a warning refused when the reason is empty, and is that reason free text or a fixed list? | UNKNOWN. The warning form collects a reason, and no allowed values are defined. Until answered, the field is free text and an empty value is stored. The photo remains the only named submit gate (Q-007) |
 
 ## 12. Document map
 

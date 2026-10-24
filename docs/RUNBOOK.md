@@ -130,7 +130,7 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Data store | Not the Pages site | PROPOSED |
 | Tow dispatch | No runbook step. The product has no such action | PROPOSED, PAC-052 |
 | Secrets | None for a tow vendor | PROPOSED |
-| Export for a dispute | An admin or signer action in the future product, per community | PROPOSED, PAC-060. Not available today |
+| Export for a dispute | An admin or signer action in the future product, per community. The archive includes the warning's stored plate and reason, and the previous and new plate on a vehicle edit | PROPOSED, PAC-060. Not available today |
 | Retention | Do not delete or keep on a schedule that has not been chosen | UNKNOWN, Q-011, RADAR for California privacy applicability |
 | Legal content of an authorization | Do not improvise from memory. Ask RADAR | UNKNOWN, Q-016 |
 | Henry as a required operator | The design forbids a person-specific permission | PROPOSED, I-11 |
@@ -138,7 +138,7 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
 | Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
 | Notice when a vehicle is held or removed | Do not send one. Whether anyone should is not chosen | UNKNOWN, Q-024 |
-| Vehicle audit retention | Do not delete vehicle audit rows on a schedule that has not been chosen. This is separate from plate, photo, and phone retention | UNKNOWN, Q-025 |
+| Vehicle audit retention | Do not delete vehicle audit rows, including the previous and new plate and description, on a schedule that has not been chosen. This is separate from plate, photo, and phone retention | UNKNOWN, Q-025 |
 
 ## 9. Questions
 
@@ -154,5 +154,6 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Q-024 | Whether to tell the resident after a hold or a removal. Until answered, send nothing |
 | Q-025 | How long vehicle audit events are kept, before any deletion job exists |
 | Q-026 | Who may take a vehicle off hold. Until answered, there is no release step |
+| Q-027 | Whether a warning with an empty reason is refused, and whether that reason is a fixed list. Until answered, store the free text, including empty |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.
