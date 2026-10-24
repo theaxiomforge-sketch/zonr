@@ -63,7 +63,7 @@ Step 3 is why `community_id` and per-community export exist in the design. Build
 
 | Statement | Label |
 | --- | --- |
-| The pilot offer is guest passes by plate and time, a vehicle registry that residents keep themselves and that an admin can hold or remove, a per-community plate-change limit whose number is not chosen, a notice to the resident when an admin holds or removes a vehicle, a patroller plate check, a warning with photos and a grace period, a stored tow authorization, and an export | Scope of this design, including D-067, D-071, and D-072. The notice channel and the plate-change number are not chosen. The software is not built (VERIFIED: the repo is still the mock) |
+| The pilot offer is guest passes by plate and time, a vehicle registry that residents keep themselves and that an admin can hold or remove, 3 plate changes per vehicle per 30 days, a notice to the resident when an admin holds or removes a vehicle, a patroller plate check, a warning with photos and a grace period, a stored tow authorization, and an export | Scope of this design, including D-067, D-072, and D-073. The notice channel is not chosen. The software is not built (VERIFIED: the repo is still the mock) |
 | Zonr does not dispatch a tow | Approved scope |
 | The current website is a demo of an earlier mock | VERIFIED |
 
