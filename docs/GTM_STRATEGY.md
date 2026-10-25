@@ -67,7 +67,7 @@ Step 3 is why `community_id` and per-community export exist in the design. Build
 | Zonr does not dispatch a tow | Approved scope |
 | The current website is a demo of an earlier mock | VERIFIED |
 
-INFERRED and not for a slide: a board that already tows will care about the written authorization record. Whether this board does is UNKNOWN (Q-016, the HOA's actual practice).
+INFERRED and not for a slide: a board that already tows will care about the written authorization record. Bridgeway's CC&Rs and parking rules are added later (D-104). Do not say the product meets CVC §22658.
 
 ## 8. Price and conflict
 
@@ -85,7 +85,7 @@ INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. 
 | Zonr dispatches tows or reads plates with a camera | False relative to the approved scope. The mock's labels suggest both (VERIFIED) | No |
 | Market size, typical HOA budget, or competitor price | UNKNOWN. RADAR | No |
 | Ready to sell the company | Intent only (VERIFIED as the statement). Terms UNKNOWN | No |
-| Legally sufficient under CVC §22658 | UNKNOWN | No |
+| Legally sufficient under CVC §22658 | PROPOSED list only (D-104). Not a legal conclusion. An attorney confirms it before the pilot goes live | No |
 
 ## 10. What has to be true before step 3
 
@@ -98,4 +98,4 @@ INFERRED: Henry sits on the pilot HOA's committee and would also be the vendor. 
 
 ## 11. Questions
 
-Q-016 stays open. Do not say the product meets CVC §22658. Market sizing is not a question for this file to answer. It is RADAR's. Q-012, Q-013, and Q-015 are resolved by D-091, D-092, and D-094.
+Q-016 is resolved by D-104. The list is PROPOSED. Do not say the product meets CVC §22658. An attorney confirms it before the pilot goes live. Bridgeway's CC&Rs and parking rules are added later. Market sizing is not a question for this file to answer. It is RADAR's. Q-012, Q-013, and Q-015 are resolved by D-091, D-092, and D-094.
