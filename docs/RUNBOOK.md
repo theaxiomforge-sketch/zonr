@@ -2,7 +2,7 @@
 
 Two different systems. The GitHub Pages demo is live. The pilot is a design and is not deployed.
 
-Code baseline: `main` `99d283e` (VERIFIED). Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. S-2 is D-067. The other pilot success criteria are UNAPPROVED.
+Code baseline: `main` `99d283e` (VERIFIED). Labels: VERIFIED, INFERRED, UNKNOWN, PROPOSED. S-1 and S-3 are accepted (D-092). S-2 is D-067. S-4, S-5, and S-6 stay UNAPPROVED. The copyright notice is [LICENSE.md](../LICENSE.md) (D-096). It is not an open-source license.
 
 ## 1. Purpose
 
@@ -44,7 +44,8 @@ Operate the public demo without pretending it is the HOA pilot, and state how a 
 | Node | 24, plus `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` | VERIFIED |
 | Artifact | `dist/` from `npm run build` | VERIFIED |
 | Concurrency | Group `pages`, cancel in progress | VERIFIED |
-| Who owns the GitHub account | UNKNOWN (`PRD.md` does not assign an owner beyond the repo) | UNKNOWN |
+| Who owns the work | Henry (TheAxiomForge). The notice is LICENSE.md. It is not an open-source license | D-096 |
+| Who owns the GitHub account | Not named by D-096. IP ownership is not a GitHub-admin seat | Still not a product rule |
 
 ### 5.1 When a deploy runs
 
@@ -131,47 +132,53 @@ There is no pilot host, database, backup, or on-call (VERIFIED by absence). When
 | Tow dispatch | No runbook step. The product has no such action | PROPOSED, PAC-052 |
 | Secrets | None for a tow vendor | PROPOSED |
 | Export for a dispute | An admin or signer action in the future product, per community. The archive includes the warning's stored plate, reason code, and reason text, and the previous and new plate on a vehicle edit | PROPOSED, PAC-060. Not available today |
-| Retention | Do not delete or keep on a schedule that has not been chosen | UNKNOWN, Q-011, RADAR for California privacy applicability |
-| Legal content of an authorization | Do not improvise from memory. Ask RADAR | UNKNOWN, Q-016 |
-| Henry as a required operator | The design forbids a person-specific permission | PROPOSED, I-11 |
-| First admin and invites | No public self-signup. The credential method is not chosen. Bootstrap is an operator action for one community, not a named person in this runbook | UNKNOWN method, Q-019. PROPOSED shape, PAC-073 |
-| Deletion of plates or photos | No pilot delete step. The window is not chosen | UNKNOWN, Q-011 |
+| Retention | Audit events: delete once past 365 days (D-074). Violation rows and tow authorizations: delete once past 36 calendar months (D-101). Do not delete photo files or phones on either job | D-074 and D-101. Plates, photos, and phones stay Q-011 |
+| Legal content of an authorization | Do not improvise from memory. Q-016 is open. The RADAR notes in `PRD.md` are not instructions. Confirm them with a California attorney before anyone treats a PDF as complete | Q-016 |
+| Henry as a required operator | The design forbids a person-specific permission. Henry owns the IP (D-096). That ownership is not a signer seat | D-096, I-11 |
+| First admin and invites | No public sign-up. Login is an email magic link (D-097). Bootstrap is an operator action for one community, not a named person in this runbook. Do not issue a magic link until its lifetime is set (Q-041). Refuse an invite that names another community. A resident invite needs a phone (D-087). A person with no email cannot be invited (Q-036) | D-097, PAC-073 |
+| Deletion of plates or photos | No operator delete step for photo files or for phones. The window is Q-011. The 36-month job deletes violation rows and tow-authorization rows, not the photo files | D-101, Q-011 |
 | Vehicle approval queue | None. A resident adds, updates, and removes their own vehicle. An admin may hold or remove a vehicle in the community | D-067 |
-| Release a hold | Only an admin. Residents and patrollers cannot. The status becomes `active`. That target is derived from D-069, which frees the vehicle for resident edits. Henry can correct the target status. Record the admin, the time, and an optional reason on the audit event. Do not send a notice | D-075. The notice is Q-032 |
+| Release a hold | Only an admin. Residents and patrollers cannot. The status becomes `active`. That target is derived from D-069. Henry can correct the target status. Record the admin, the time, and an optional reason on the audit event. Notify the resident by email and by text | D-075 and D-102 |
 | How many vehicles one resident may register | No cap. Do not refuse an add because the account already has vehicles. One current row per plate still applies | D-070. Plate rule is PAC-024 |
-| Notice when an admin holds or removes a vehicle | Send one to that vehicle's resident. Do not choose the channel or the wording. Do not send one when the resident removes their own vehicle | D-072. Channel and wording are Q-028, tied to Q-019 |
-| Plate changes | Allow a change while fewer than 3 plate-change events for that vehicle are under 30 × 24 hours old. At exactly 30 × 24 hours the oldest no longer counts, and another change is allowed if fewer than 3 remain in the count. Refuse the 4th while three still count. Do not count a description-only edit or the original add. Do not share the count across a resident's vehicles. Admins see the changes on the vehicle audit events. Do not keep a second log. Do not add another abuse control | D-073. The 30-day count is the proposed rolling window, Q-029. Further controls are Q-030 and are not in force |
-| Audit log retention | A job deletes an audit event once its age is past 365 days. Keep an event at 364 days and an event at exactly 365 days. Do not archive the deleted event. Do not delete a violation, a tow authorization, a photo, or a notification event in that job. Do not use this job on the 30-day plate-change count. An event still counts only while its age is under 30 × 24 hours. An event aged exactly 30 × 24 hours no longer counts and is still kept | D-074. Plates, photos, and phones stay Q-011. Violation and tow-authorization retention is Q-031 |
-| File a warning | Refuse an empty reason. The patroller picks one code from the proposed list in `FRD.md` and in `PRD.md` section 11.2. Other requires a description. Do not accept a description on any other code. The close reason stays free text and is not that list. Do not file one when the plate check says "on hold, don't act" | D-076. The codes and labels are PROPOSED for Henry to confirm. The hold refusal is D-077 |
-| Held vehicle | The patroller sees "on hold, don't act". Do not file a warning. Do not start a tow. Contact an admin of that community. Only an admin can release the hold. Do not name a person, and do not call a tow company. After the admin releases the hold, the plate check no longer shows that line, and warning and tow follow the usual rules | D-077. Release is D-075 |
+| Notice when an admin holds, removes, or releases a vehicle | Send email and text to that vehicle's resident. Do not choose the wording (Q-037). If the text fails, keep the email and record the failure. Do not try another number. Do not send one when the resident removes their own vehicle | D-072, D-098, and D-102. The phone is required by D-087 |
+| Guest passes | Stay cap 72 hours. Month cap 4 passes per household per Pacific calendar month. Refuse a second unrevoked pass on the same plate, including one that has not started. The daily household cap is configuration and is unset: refuse creates until it is set (Q-034). Do not invent the number | D-080, D-081, D-082, D-083, D-100 |
+| Plate changes | Allow a change while fewer than 3 plate-change events for that vehicle are under 30 × 24 hours old. At exactly 30 × 24 hours the oldest no longer counts, and another change is allowed if fewer than 3 remain in the count. Refuse the 4th while three still count, and write an admin alert. Do not send that alert until its channel is chosen (Q-038). Do not count a description-only edit or the original add. Do not share the count across a resident's vehicles. Admins see the changes on the vehicle audit events. Do not keep a second log | D-073, D-099, and D-100 |
+| Audit log retention | A job deletes an audit event once its age is past 365 days. Keep an event at 364 days and an event at exactly 365 days. Do not archive the deleted event. Do not delete a violation, a tow authorization, a photo, or a notification event in that job. The plate on the violation stays. Do not use this job on the 30-day plate-change count. An event still counts only while its age is under 30 × 24 hours. An event aged exactly 30 × 24 hours no longer counts and is still kept | D-074. The RADAR 12-month default does not replace 365 days |
+| Violation and tow retention | A different job deletes a violation past 36 calendar months from the first warning, and a tow authorization past 36 calendar months from the signature. Keep a record at exactly 36 calendar months. Do not delete photo files in this job | D-101. Photo files stay Q-011 |
+| File a warning | Refuse an empty reason. The patroller picks one code from the proposed list in `FRD.md` and in `PRD.md` section 11.2. Other requires a description. Do not accept a description on any other code. Require at least one photo. The close reason stays free text and is not that list. Do not file one when the plate check says "on hold, don't act" | D-076 and D-086. The codes and labels are PROPOSED for Henry to confirm. The hold refusal is D-077 |
+| Second warning | On the same open violation, not a second row. The patroller uses the same reason list and a new photo. Do not offer a tow until this step exists and the 3-day grace has ended. Do not require a wait or the same reason (Q-033). Do not file it when the plate is on hold | D-085, D-084, D-077 |
+| Held vehicle | The patroller sees "on hold, don't act". Do not file a warning or a second warning. Do not start a tow. Contact an admin of that community. Only an admin can release the hold. Do not name a person, and do not call a tow company. After the admin releases the hold, the plate check no longer shows that line, and warning and tow follow the usual rules | D-077. Release is D-075 |
+| Guest link | An unrevoked pass stays viewable for 24 hours after it ends, including at exactly 24 hours, and the page says the pass has ended. A revoked pass, an unknown token, and a pass older than those 24 hours show only "this link is not valid." | D-088 |
+| Pilot paperwork | The board disclosure and the short pilot agreement are planned documents outside this repository. The pilot is free. Do not copy those files into the repo | D-091 |
+| IP | Do not replace [LICENSE.md](../LICENSE.md) with an open-source license. Henry (TheAxiomForge) owns the work | D-096 |
 
 ## 9. Questions
 
-Decisions are in `PRD.md` section 11.1. Q-021 is resolved there by D-069. Q-022 is resolved there by D-070. Q-023 is resolved there by D-073. Q-024 is resolved there by D-072. Q-025 is resolved there by D-074. Q-026 is resolved there by D-075. Q-027 is resolved there by D-076. Q-020 is resolved there by D-077. Q-028, Q-029, Q-030, Q-031, and Q-032 stay open. Q-011 stays open.
+Decisions are in `PRD.md` section 11.1. Q-001 through Q-010, Q-012 through Q-015, and Q-017 through Q-032 are resolved there. Q-011 and Q-016 stay open. Q-033, Q-034, Q-035, Q-036, Q-037, Q-038, and Q-041 stay open.
 
-The warning-reason list is PROPOSED for Henry to confirm. It is in `PRD.md` section 11.2. It is not a new question number.
+The warning-reason list is PROPOSED for Henry to confirm. It is in `PRD.md` section 11.2. It is not a new question number. The resident consent step is PROPOSED and is not a legal conclusion.
 
-To verify the audit job: run it, then check one audit event aged 364 days and one aged exactly 365 days are still present, and one aged past 365 days is gone with no archive copy. Check the violation's stored plate and the tow authorization's copied plate are unchanged. Check a plate-change event aged exactly 30 × 24 hours is still present and no longer counts toward the plate-change limit.
+To verify the audit job: run it, then check one audit event aged 364 days and one aged exactly 365 days are still present, and one aged past 365 days is gone with no archive copy. Check the violation's stored plate and the tow authorization's copied plate are unchanged. Check a plate-change event aged exactly 30 × 24 hours is still present and no longer counts toward the plate-change limit. To verify the 36-month job: a violation and a tow authorization at exactly 36 calendar months are still present, and ones past that date are gone. Photo files are still present.
 
 | Id | What operations needs |
 | --- | --- |
-| Q-011 | Retention, before any pilot backup policy is written. RADAR on California privacy applicability |
-| Q-012 | Whether a contract exists before any real plate is stored |
-| Q-016 | RADAR, before anyone treats a PDF in the product as a complete authorization |
-| Q-018 | Who owns the GitHub account and the IP, before a second person is made admin of the repo |
-| Q-019 | How the first admin signs in, before any resident plate is collected |
-| Q-020 | Resolved by D-077. On a held plate, show "on hold, don't act". Do not file a warning or start a tow. Contact an admin of the community. After that admin releases the hold, the usual warning and tow rules apply |
-| Q-021 | Resolved by D-069. A resident cannot change or remove a held vehicle. An admin release is what frees it. That release is D-075, and it is not the remove action |
-| Q-022 | Resolved by D-070. Do not refuse an add because the resident already has vehicles |
-| Q-023 | Resolved by D-073. Enforce 3 plate changes per vehicle per 30 days. Admins already see them on the audit events |
-| Q-024 | Resolved by D-072. Tell the resident after an admin hold or an admin removal. Do not tell them after their own removal |
-| Q-025 | Resolved by D-074. The audit job purges events past 365 days. Verify with the checks above |
-| Q-026 | Resolved by D-075. Only an admin releases a hold. The status becomes active, derived from D-069. Do not let a resident or a patroller do it |
-| Q-027 | Resolved by D-076. Refuse a warning with an empty reason. Store a code from the proposed list. Other needs a description. Do not store a description on any other code. The close reason stays free text |
-| Q-028 | Which channel carries the hold or removal notice, and what it says. Tied to Q-019. Until answered, write the event and do not choose a channel or wording |
-| Q-029 | Whether the 30 days are a rolling 30 × 24 hours on server timestamps, which is the proposed count, or some other window. Until answered, count an event while its age is under 30 × 24 hours and drop it at exactly that age. The audit row stays. Do not switch to a calendar or a community timezone |
-| Q-030 | Whether any abuse control besides the plate-change limit is required. Until answered, do not add one |
-| Q-031 | Whether violation records and tow-authorization records follow the 365-day audit retention. Until answered, the audit job does not delete them |
-| Q-032 | Whether releasing a hold notifies the resident. Until answered, do not send one. D-072 covers hold and remove only |
+| Q-011 | Still open. Do not pick photo or phone retention from the RADAR table until Henry does. The audit job stays 365 days. The violation and tow job stays 36 months |
+| Q-012 | Resolved by D-091. Use the disclosure and the pilot agreement that already exist outside the repo. The pilot is free. Do not commit those files |
+| Q-016 | Still open. Do not treat the RADAR sign and authorization notes as the runbook. Confirm with a California attorney |
+| Q-018 | Resolved by D-096. Henry personally owns the IP. The notice is LICENSE.md |
+| Q-019 | Resolved by D-097. Magic link by email. Bootstrap one admin for one community. Refuse a cross-community invite |
+| Q-020 | Resolved by D-077. On a held plate, show "on hold, don't act". Do not file a warning, a second warning, or a tow |
+| Q-028 | Resolved by D-098 for the channel. Email and text. The words are Q-037 |
+| Q-029 | Resolved by D-099. Count an event while its age is under 30 × 24 hours and drop it at exactly that age |
+| Q-030 | Resolved by D-100. Alert an admin on the refused 4th plate change. Do not set the daily guest-pass number (Q-034) |
+| Q-031 | Resolved by D-101. 36 months for violation records and tow authorizations. The audit log stays 365 days |
+| Q-032 | Resolved by D-102. A release notifies the resident by email and text |
+| Q-033 | Still open. Do not add a wait between warnings, and do not require the same reason |
+| Q-034 | Still open. Leave the daily cap unset and refuse pass creates until Henry sets it |
+| Q-035 | Still open. When both the month cap and the daily cap fail, refuse the pass and do not pick which error to show |
+| Q-036 | Still open. Do not invent a sign-in for a person with no email |
+| Q-037 | Still open. Do not write the notice text |
+| Q-038 | Still open. Write the plate-change alert and do not send it |
+| Q-041 | Still open. Do not issue magic links until the lifetime is set |
 
 D-053's reviewer list remains UNKNOWN until Henry writes it down.
